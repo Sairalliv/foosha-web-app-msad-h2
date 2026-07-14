@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd foosha && npm run build",
+  "installCommand": "cd foosha && npm install",
+  "outputDirectory": "foosha/.next"
+}
