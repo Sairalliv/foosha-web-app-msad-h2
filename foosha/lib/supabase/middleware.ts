@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    // Fallback if environment variables are missing (prevents 500 crash on Vercel)
+    // Fallback if environment variables are missing (prevents crash)
     if (!supabaseUrl || !supabaseKey) {
       console.warn('⚠️ Middleware: Supabase environment variables are missing.')
       return supabaseResponse
@@ -25,22 +25,42 @@ export async function updateSession(request: NextRequest) {
             return request.cookies.getAll()
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-            supabaseResponse = NextResponse.next({
-              request,
-            })
-            cookiesToSet.forEach(({ name, value, options }) =>
-              supabaseResponse.cookies.set(name, value, options)
-            )
+            // Next.js Edge Runtime throws strictly if cookie operations fail. 
+            // Wrapping this in try/catch is critical for Vercel stability.
+            try {
+              cookiesToSet.forEach(({ name, value }) => {
+                request.cookies.set(name, value)
+              })
+              
+              supabaseResponse = NextResponse.next({
+                request,
+              })
+              
+              cookiesToSet.forEach(({ name, value, options }) => {
+                supabaseResponse.cookies.set({
+                  name,
+                  value,
+                  ...options,
+                })
+              })
+            } catch (error) {
+              // Ignore cookie parsing errors in edge (frequent in Next 14/15)
+              console.warn('Middleware: Ignored edge cookie manipulation error', error)
+            }
           },
         },
       }
     )
 
-    // This will refresh the session if expired
+    // Refresh the session if expired
     const {
       data: { user },
+      error
     } = await supabase.auth.getUser()
+
+    if (error) {
+       console.warn('Middleware: Supabase Auth error:', error.message)
+    }
 
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/admin')
@@ -62,12 +82,8 @@ export async function updateSession(request: NextRequest) {
 
     return supabaseResponse
   } catch (error) {
-    // If any unexpected error occurs, gracefully continue rather than crashing the whole site
-    console.error('Middleware execution error:', error)
-    return NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
+    // Return a pristine NextResponse if absolutely anything crashes in Edge
+    console.error('Middleware Critical Error:', error)
+    return NextResponse.next()
   }
 }
