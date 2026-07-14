@@ -234,14 +234,36 @@ export async function confirmMatch(donationId: string, requestId: string): Promi
 
 export async function getAdminOverviewStats(): Promise<AdminOverviewStats> {
   const donations = await listDonations();
+  const requests = await listRequests();
+  
   const pendingMatches = donations.filter((d) => d.status === "awaiting_pickup" || d.status === "matching").length;
   const deliveredThisMonth = donations.filter((d) => d.status === "confirmed").length;
-  const totalValueDonatedPhp = donations.reduce((sum, d) => sum + (d.amountPhp ?? 0), 0) + 312000; // seeded baseline
+  
+  // Base sum + seeded baseline
+  const baseValueDonated = donations.reduce((sum, d) => sum + (d.amountPhp ?? 0), 0);
+  const totalValueDonatedPhp = baseValueDonated + 312000; 
+
+  const activeRequests = requests.filter((r) => r.status === "unmatched" || r.status === "matching");
+  const activeRequestsElderly = activeRequests.filter((r) => r.priorityTier === "elderly").length;
+  const activeRequestsPWD = activeRequests.filter((r) => r.priorityTier === "pwd").length;
+  const activeRequestsInfant = activeRequests.filter((r) => r.priorityTier === "infant").length;
+
+  const foodDonationsCount = donations.filter(d => d.kind === "food" && d.createdAt.startsWith("2026-07")).length + 145; // seeded baseline
+  const cashDonationsTotal = baseValueDonated + 85000; // seeded baseline
+
   return {
     pendingMatches: pendingMatches || 14,
     deliveredThisMonth: deliveredThisMonth || 208,
     totalValueDonatedPhp,
     confirmedWithin24hPct: 96,
+    
+    activeRequestsTotal: activeRequests.length || 42, // seeded baseline
+    activeRequestsElderly: activeRequestsElderly || 18,
+    activeRequestsPWD: activeRequestsPWD || 12,
+    activeRequestsInfant: activeRequestsInfant || 8,
+    
+    foodDonationsCount,
+    cashDonationsTotal,
   };
 }
 

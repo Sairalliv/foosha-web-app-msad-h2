@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import AdminHeader from "../components/AdminHeader";
 import { useAuth } from "../context/AuthContext";
 
 export default function AdminLayout() {
@@ -9,7 +10,7 @@ export default function AdminLayout() {
   const initials = user?.avatarInitials ?? "CH";
 
   return (
-    <div className="app">
+    <div className="app admin-app">
       <Sidebar
         subtitle="City admin console"
         profileName={profileName}
@@ -39,8 +40,11 @@ export default function AdminLayout() {
           },
         ]}
       />
-      <main>
-        <Outlet />
+      <main className="admin-main">
+        <AdminHeader />
+        <div className="admin-content">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

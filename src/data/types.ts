@@ -104,6 +104,15 @@ export interface AdminOverviewStats {
   deliveredThisMonth: number;
   totalValueDonatedPhp: number;
   confirmedWithin24hPct: number;
+  
+  // New granular stats for the dashboard
+  activeRequestsTotal: number;
+  activeRequestsElderly: number;
+  activeRequestsPWD: number;
+  activeRequestsInfant: number;
+  
+  foodDonationsCount: number;
+  cashDonationsTotal: number;
 }
 
 export interface AnalyticsSnapshot {
