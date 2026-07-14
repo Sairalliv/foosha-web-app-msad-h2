@@ -1,10 +1,6 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from './lib/supabase/middleware'
+import { proxyHandler } from './lib/proxy'
 
-export async function middleware(request: NextRequest) {
-  // updateSession handles route protection and token refreshing
-  return await updateSession(request)
-}
+export const proxy = proxyHandler
 
 export const config = {
   matcher: [
