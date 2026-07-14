@@ -29,7 +29,7 @@ export default function Sidebar({ groups, profileName, profileRole, avatarInitia
     <aside className="sidebar">
       <img
         className={`logo-mark${subtitle ? " compact" : ""}`}
-        src="/assets/foosha-logo.png"
+        src={`${import.meta.env.BASE_URL}assets/foosha-logo.png`}
         alt="Foosha"
       />
       {subtitle && <div className="logo-sub">{subtitle}</div>}

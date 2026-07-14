@@ -19,7 +19,7 @@ export default function RoleSelect() {
   return (
     <div className="role-picker">
       <div className="role-picker-inner">
-        <img src="/assets/foosha-logo.png" alt="Foosha" style={{ height: 36, marginBottom: 32 }} />
+        <img src={`${import.meta.env.BASE_URL}assets/foosha-logo.png`} alt="Foosha" style={{ height: 36, marginBottom: 32 }} />
         <div className="eyebrow">Continue as</div>
         <h1 style={{ marginBottom: 28 }}>Who's using Foosha today?</h1>
 

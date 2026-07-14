@@ -5,7 +5,7 @@ export default function Landing() {
     <div>
       <header className="site">
         <nav className="site">
-          <img className="logo-mark" style={{ marginBottom: 0, height: 30 }} src="/assets/foosha-logo.png" alt="Foosha" />
+          <img className="logo-mark" style={{ marginBottom: 0, height: 30 }} src={`${import.meta.env.BASE_URL}assets/foosha-logo.png`} alt="Foosha" />
           <div className="navlinks">
             <a href="#roles">How it works</a>
             <a href="#trust">Trust &amp; codes</a>
