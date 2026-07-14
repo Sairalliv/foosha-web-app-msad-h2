@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
   try {
-    let supabaseResponse = NextResponse.next()
+    let supabaseResponse = NextResponse.next({
+      request,
+    })
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -23,24 +25,15 @@ export async function updateSession(request: NextRequest) {
             return request.cookies.getAll()
           },
           setAll(cookiesToSet) {
-            // Next.js Edge Runtime throws strictly if cookie operations fail. 
-            // Wrapping this in try/catch is critical for Vercel stability.
             try {
-              cookiesToSet.forEach(({ name, value }) => {
-                request.cookies.set(name, value)
+              cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+              supabaseResponse = NextResponse.next({
+                request,
               })
-              
-              supabaseResponse = NextResponse.next()
-              
-              cookiesToSet.forEach(({ name, value, options }) => {
-                supabaseResponse.cookies.set({
-                  name,
-                  value,
-                  ...options,
-                })
-              })
+              cookiesToSet.forEach(({ name, value, options }) =>
+                supabaseResponse.cookies.set(name, value, options)
+              )
             } catch (error) {
-              // Ignore cookie parsing errors in edge (frequent in Next 14/15)
               console.warn('Middleware: Ignored edge cookie manipulation error', error)
             }
           },
