@@ -10,7 +10,7 @@ const initialState = {
 }
 
 export function LoginForm({ nextUrl }: { nextUrl?: string }) {
-  const [state, formAction] = useActionState(async (prevState: any, formData: FormData) => {
+  const [state, formAction] = useActionState(async (prevState: { error: string }, formData: FormData) => {
     const res = await loginAction(formData)
     if (res?.error) {
       return { error: res.error }

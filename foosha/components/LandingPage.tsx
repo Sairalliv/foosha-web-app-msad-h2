@@ -678,7 +678,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-4 mt-2">Log Food details</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">
-                    Click "Donate Food" and list details about ingredients, portion sizing, expiry time, and food preservation type.
+                    Click &quot;Donate Food&quot; and list details about ingredients, portion sizing, expiry time, and food preservation type.
                   </p>
                 </div>
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
@@ -742,7 +742,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-4 mt-2">Post Demands</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">
-                    Relief workers or centers click "NEED HELP" and post dietary specifications and headcount targets.
+                    Relief workers or centers click &quot;NEED HELP&quot; and post dietary specifications and headcount targets.
                   </p>
                 </div>
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
@@ -1169,7 +1169,7 @@ export default function LandingPage() {
                 </div>
                 <h4 className="text-lg font-bold text-slate-900">Donation Successfully Logged!</h4>
                 <p className="text-sm text-slate-500 max-w-sm mx-auto mt-2 leading-relaxed">
-                  We've successfully updated local state. A driver will be assigned shortly. Keep food sealed and stored at proper temperatures.
+                  We&apos;ve successfully updated local state. A driver will be assigned shortly. Keep food sealed and stored at proper temperatures.
                 </p>
                 <button
                   onClick={() => { resetDonationModal(); setIsDonateModalOpen(false); }}
