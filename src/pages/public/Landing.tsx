@@ -7,9 +7,9 @@ export default function Landing() {
         <nav className="site">
           <img className="logo-mark" style={{ marginBottom: 0, height: 30 }} src={`${import.meta.env.BASE_URL}assets/foosha-logo.png`} alt="Foosha" />
           <div className="navlinks">
-            <a href="#roles">How it works</a>
-            <a href="#trust">Trust &amp; codes</a>
-            <a href="#board">Leaderboard</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#trust-codes">Trust &amp; codes</a>
+            <a href="#leaderboard">Leaderboard</a>
           </div>
           <div className="nav-cta">
             <Link to="/login" className="btn btn-ghost">Log in</Link>
@@ -53,7 +53,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="roles" className="landing wrap">
+      <section id="how-it-works" className="landing wrap">
         <div className="section-head">
           <div className="eyebrow">How it works</div>
           <h2>One app, three ways in.</h2>
@@ -90,7 +90,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="trust" className="landing wrap">
+      <section id="trust-codes" className="landing wrap">
         <div className="section-head">
           <div className="eyebrow">Trust &amp; codes</div>
           <h2>Nothing counts until it's confirmed.</h2>
@@ -146,7 +146,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="board" className="landing wrap">
+      <section id="leaderboard" className="landing wrap">
         <div className="section-head" style={{ marginBottom: 40, margin: "0 auto 48px", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>Mandaue City · Top donors this month</div>
           <h2>The city's biggest hearts.</h2>
