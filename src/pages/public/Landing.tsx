@@ -146,6 +146,71 @@ export default function Landing() {
         </div>
       </section>
 
+      <section id="board" className="landing wrap">
+        <div className="section-head" style={{ marginBottom: 40, margin: "0 auto 48px", textAlign: "center" }}>
+          <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>Mandaue City · Top donors this month</div>
+          <h2>The city's biggest hearts.</h2>
+        </div>
+        
+        <div className="public-leaderboard">
+          <div className="lb-header">
+            <div>Rank</div>
+            <div>Donor</div>
+            <div style={{ textAlign: "right" }}>Lifetime Given</div>
+          </div>
+          
+          <div className="lb-row top-rank">
+            <div className="rank-num">1</div>
+            <div>
+              <div className="name">Basak Sari-Sari Store</div>
+              <div className="badges">
+                <span className="badge-pill bayani">Bayani ng Barangay</span>
+                <span className="badge-pill first">First Harvest</span>
+              </div>
+            </div>
+            <div className="amount">₱18,400</div>
+          </div>
+          
+          <div className="lb-row">
+            <div className="rank-num">2</div>
+            <div>
+              <div className="name">Dela Peña Family</div>
+              <div className="badges">
+                <span className="badge-pill first">First Harvest</span>
+              </div>
+            </div>
+            <div className="amount">₱11,050</div>
+          </div>
+          
+          <div className="lb-row">
+            <div className="rank-num">3</div>
+            <div>
+              <div className="name">Tipolo Bakeshop</div>
+              <div className="badges">
+                <span className="badge-pill first">First Harvest</span>
+              </div>
+            </div>
+            <div className="amount">₱7,900</div>
+          </div>
+
+          <div className="lb-row">
+            <div className="rank-num">4</div>
+            <div>
+              <div className="name">Subangdaku Rotary Club</div>
+            </div>
+            <div className="amount">₱6,200</div>
+          </div>
+          
+          <div className="lb-row">
+            <div className="rank-num">5</div>
+            <div>
+              <div className="name">M. Fernandez</div>
+            </div>
+            <div className="amount">₱4,850</div>
+          </div>
+        </div>
+      </section>
+
       <section className="cta-band wrap">
         <div className="eyebrow" style={{ justifyContent: "center" }}>Join the network</div>
         <h2>Mandaue takes care of Mandaue.</h2>
