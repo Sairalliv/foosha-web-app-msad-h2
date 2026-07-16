@@ -19,7 +19,7 @@ export default async function AdminLayout({
     .toUpperCase()
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', minHeight: '100vh', background: 'var(--bg)', color: 'var(--paper)' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', height: '100vh', overflow: 'hidden', background: 'var(--bg)', color: 'var(--paper)' }}>
       <AdminSidebar adminName={displayName} adminInitials={initials} />
       
       <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
