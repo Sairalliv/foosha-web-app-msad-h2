@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useActionState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import styles from './RoleAuth.module.css';
 import { createClient } from '@/lib/supabase/client';
 import { loginAction, registerAction } from '@/actions/auth-actions';

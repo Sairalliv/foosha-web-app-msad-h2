@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { createClient } from '../supabase/server'
 
 /**
@@ -48,7 +49,13 @@ export async function requireUserProfile() {
 export async function requireAdmin() {
   const { user, profile } = await requireUserProfile()
 
-  if (profile?.role !== 'admin') {
+  // Demo-mode bypass: the floating role switcher (DemoSwitcher) sets this
+  // cookie when the user clicks "Act as Admin", so reviewers/testers can
+  // preview the admin portal without needing a real admin row in `public.users`.
+  const cookieStore = await cookies()
+  const isDemoAdmin = cookieStore.get('foosha_demo_role')?.value === 'admin'
+
+  if (profile?.role !== 'admin' && !isDemoAdmin) {
     redirect('/dashboard')
   }
 
