@@ -113,6 +113,10 @@ export function DemoSwitcher() {
                 <button
                   key={role.key}
                   onClick={() => {
+                    // Let server-side guards (e.g. requireAdmin) know we're in
+                    // demo mode, since this switcher doesn't touch the real
+                    // Supabase profile role.
+                    document.cookie = `foosha_demo_role=${role.key}; path=/; max-age=86400; samesite=lax`
                     router.push(role.href)
                     setOpen(false)
                   }}
