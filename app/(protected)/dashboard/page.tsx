@@ -2,13 +2,23 @@ import { requireUserProfile } from '@/lib/auth/guards'
 import { logoutAction } from '@/actions/auth-actions'
 import Link from 'next/link'
 import Image from 'next/image'
+import { DonorDashboard } from '@/components/dashboard/DonorDashboard'
+import { RecipientDashboard } from '@/components/dashboard/RecipientDashboard'
+import { DemoRoleSwitcher } from '@/components/dashboard/DemoRoleSwitcher'
 
 export const metadata = {
   title: 'Dashboard - Foosha',
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { user, profile } = await requireUserProfile()
+  const resolvedParams = await searchParams
+
+  const effectiveRole = resolvedParams?.demo_role || profile?.role || 'donor'
 
   const displayName = profile?.full_name || user.email || 'there'
   const initials = displayName
@@ -21,6 +31,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="app">
+      <DemoRoleSwitcher />
       <aside className="sidebar">
         <Image
           className="logo-mark"
@@ -35,9 +46,9 @@ export default async function DashboardPage() {
           <Link href="/dashboard" className="nav-item active">
             <span>◆ Dashboard</span>
           </Link>
-          {profile?.role === 'admin' && (
+          {effectiveRole === 'admin' && (
             <Link href="/admin" className="nav-item">
-              <span>◆ Admin Panel</span>
+              <span>◆ Admin Portal</span>
             </Link>
           )}
         </div>
@@ -48,7 +59,7 @@ export default async function DashboardPage() {
               <div className="avatar">{initials || 'U'}</div>
               <div>
                 <div className="who">{displayName}</div>
-                <div className="role">{profile?.role || 'user'} · Log out</div>
+                <div className="role">{effectiveRole} · Log out</div>
               </div>
             </button>
           </form>
@@ -56,40 +67,39 @@ export default async function DashboardPage() {
       </aside>
 
       <main>
-        <div className="welcome-card">
-          <div className="welcome-text">
-            <div className="eyebrow">Dashboard</div>
-            <h1>Welcome back, {displayName.split(' ')[0]}</h1>
-            <p className="sub">Here&apos;s what&apos;s happening with your account.</p>
+        {effectiveRole === 'donor' && <DonorDashboard displayName={displayName} initials={initials} />}
+        {effectiveRole === 'recipient' && <RecipientDashboard displayName={displayName} initials={initials} />}
+        {effectiveRole === 'admin' && (
+          <div>
+            <div className="welcome-card mb-8">
+              <div className="welcome-text">
+                <div className="eyebrow">Admin Dashboard</div>
+                <h1>Welcome back, {displayName.split(' ')[0]}</h1>
+                <p className="sub">You are viewing the basic dashboard. The full admin portal contains all operations.</p>
+              </div>
+              <div className="welcome-avatar">{initials || 'A'}</div>
+            </div>
+            <div className="panel flex-1 bg-[var(--bg-panel)] border border-[var(--line)]">
+              <h3 className="text-xl font-display text-primary mb-2">Access Admin Portal</h3>
+              <p className="sub mb-6 text-paper-dim">
+                Manage verifications, view analytics, and oversee operations from the dedicated admin interface.
+              </p>
+              <Link href="/admin" className="btn" style={{ background: 'var(--primary)', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '4px', display: 'inline-block', fontWeight: 'bold' }}>
+                Open Admin Portal
+              </Link>
+            </div>
           </div>
-          <div className="welcome-avatar">{initials || 'U'}</div>
-        </div>
-
-        <div className="grid-3">
-          <div className="panel">
-            <h3>User Profile</h3>
-            <p className="sub" style={{ margin: '10px 0 16px' }}>
-              View and edit your personal information and preferences.
-            </p>
-            <button className="btn btn-ghost btn-sm">Manage Profile</button>
+        )}
+        
+        {!['donor', 'recipient', 'admin'].includes(effectiveRole as string) && (
+          <div className="welcome-card">
+            <div className="welcome-text">
+              <div className="eyebrow">Dashboard</div>
+              <h1>Welcome back, {displayName.split(' ')[0]}</h1>
+              <p className="sub">Please update your profile to select a role.</p>
+            </div>
           </div>
-
-          <div className="panel">
-            <h3>Billing &amp; Subscriptions</h3>
-            <p className="sub" style={{ margin: '10px 0 16px' }}>
-              Manage your payment methods and current plans.
-            </p>
-            <button className="btn btn-ghost btn-sm">Manage Billing</button>
-          </div>
-
-          <div className="panel">
-            <h3>Security</h3>
-            <p className="sub" style={{ margin: '10px 0 16px' }}>
-              Update your password and configure two-factor authentication.
-            </p>
-            <button className="btn btn-ghost btn-sm">Security Settings</button>
-          </div>
-        </div>
+        )}
       </main>
     </div>
   )
