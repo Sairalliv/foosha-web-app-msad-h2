@@ -155,6 +155,126 @@
   height: 22px;
 }
 
+/* --- Form Styles --- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-size: 0.9rem;
+  color: #8FB8A8;
+  font-weight: 500;
+}
+
+.field input {
+  background-color: #0D1A17;
+  border: 1px solid rgba(143, 184, 168, 0.3);
+  color: white;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #8FB8A8;
+  box-shadow: 0 0 0 3px rgba(143, 184, 168, 0.15);
+}
+
+.submitButton {
+  background-color: #8FB8A8;
+  color: #132420;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.submitButton:hover {
+  background-color: #a4c9ba;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(143, 184, 168, 0.2);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error {
+  color: #E8542F;
+  background-color: rgba(232, 84, 47, 0.1);
+  border-left: 3px solid #E8542F;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider::before {
+  margin-right: 1rem;
+}
+
+.divider::after {
+  margin-left: 1rem;
+}
+
+.toggleContainer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #8FB8A8;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  color: #C7D94D;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: inherit;
+  transition: color 0.2s;
+}
+
+.toggleButton:hover {
+  color: #dff063;
+}
+
 @keyframes slideUpFade {
   from {
     opacity: 0;

@@ -32,6 +32,7 @@ export async function registerAction(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const fullName = formData.get('full_name') as string
+  const role = formData.get('role') as string
 
   if (!email || !password) {
     return { error: 'Email and password are required' }
@@ -45,6 +46,7 @@ export async function registerAction(formData: FormData) {
     options: {
       data: {
         full_name: fullName,
+        role: role,
       },
     },
   })
