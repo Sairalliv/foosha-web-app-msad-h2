@@ -2,6 +2,7 @@
 
 import React, { useState, useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import styles from './RoleAuth.module.css';
 import { createClient } from '@/lib/supabase/client';
 import { loginAction, registerAction } from '@/actions/auth-actions';
