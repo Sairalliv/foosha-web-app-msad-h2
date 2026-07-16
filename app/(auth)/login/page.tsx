@@ -1,10 +1,10 @@
-import { LoginForm } from '@/components/auth/LoginForm'
+import { RoleAuth } from '@/components/auth/RoleAuth'
 import { getUserOrNull } from '@/lib/auth/guards'
 import { redirect } from 'next/navigation'
 
 export const metadata = {
-  title: 'Login - Foosha',
-  description: 'Sign in to your Foosha account',
+  title: 'Sign Up & Login - Foosha',
+  description: 'Select your role and sign in to Foosha',
 }
 
 export default async function LoginPage({
@@ -18,8 +18,5 @@ export default async function LoginPage({
     redirect('/dashboard')
   }
 
-  const { next } = await searchParams
-  const nextUrl = typeof next === 'string' ? next : undefined
-
-  return <LoginForm nextUrl={nextUrl} />
+  return <RoleAuth />
 }

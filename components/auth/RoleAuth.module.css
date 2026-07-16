@@ -1,0 +1,167 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #132420; /* Deep mangrove green base */
+  padding: 2rem;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.authCard {
+  background-color: #18302A; /* Elevated panel */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: #8FB8A8; /* Subtle teal for secondary text */
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.roleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.roleButton {
+  background-color: #0D1A17; /* Recessed surfaces */
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.roleTitle {
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.roleDesc {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  line-height: 1.4;
+  transition: opacity 0.3s ease;
+}
+
+/* --- Donor Styles --- */
+.roleButton.donor {
+  border-color: rgba(199, 217, 77, 0.15); /* Faint Kalamansi */
+}
+.roleButton.donor:hover {
+  border-color: #C7D94D;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(199, 217, 77, 0.1);
+}
+.roleButton.donor.selected {
+  background-color: #C7D94D;
+  border-color: #C7D94D;
+  color: #1C2A22; /* High contrast text for Kalamansi background */
+  transform: translateY(0);
+}
+.roleButton.donor.selected .roleDesc {
+  opacity: 0.9;
+}
+
+/* --- Recipient Styles --- */
+.roleButton.recipient {
+  border-color: rgba(232, 84, 47, 0.15); /* Faint Jeepney Orange */
+}
+.roleButton.recipient:hover {
+  border-color: #E8542F;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(232, 84, 47, 0.15);
+}
+.roleButton.recipient.selected {
+  background-color: #E8542F;
+  border-color: #E8542F;
+  color: #ffffff;
+  transform: translateY(0);
+}
+
+/* --- Admin Styles --- */
+.roleButton.admin {
+  border-color: rgba(143, 184, 168, 0.15); /* Faint Muted Teal */
+}
+.roleButton.admin:hover {
+  border-color: #8FB8A8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(143, 184, 168, 0.15);
+}
+.roleButton.admin.selected {
+  background-color: #8FB8A8;
+  border-color: #8FB8A8;
+  color: #132420; /* High contrast dark text for Teal background */
+  transform: translateY(0);
+}
+
+/* --- Google Continue Button --- */
+.continueWrapper {
+  animation: slideUpFade 0.4s ease forwards;
+}
+
+.googleButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background-color: #ffffff;
+  color: #132420;
+  border: none;
+  border-radius: 8px;
+  padding: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.googleButton:hover {
+  background-color: #f1f1f1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
+.googleIcon {
+  width: 22px;
+  height: 22px;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
