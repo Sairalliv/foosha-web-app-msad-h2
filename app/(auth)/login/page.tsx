@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { RoleAuth } from '@/components/auth/RoleAuth'
 import { getUserOrNull } from '@/lib/auth/guards'
 import { redirect } from 'next/navigation'
@@ -18,5 +19,9 @@ export default async function LoginPage({
     redirect('/dashboard')
   }
 
-  return <RoleAuth />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RoleAuth />
+    </Suspense>
+  )
 }
