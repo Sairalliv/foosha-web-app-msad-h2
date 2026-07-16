@@ -16,9 +16,9 @@ export const metadata: Metadata = {
   title: "Foosha - Food Surplus & Donation Platform",
   description: "Bridge the gap between surplus food and hunger. Connect food donors, volunteers, and charity centers.",
   icons: {
-    icon: "/logo.svg",
-    shortcut: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/assets/foosha-logo.png",
+    shortcut: "/assets/foosha-logo.png",
+    apple: "/assets/foosha-logo.png",
   },
 };
 
