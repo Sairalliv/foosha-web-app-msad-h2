@@ -24,6 +24,12 @@
   margin-bottom: 2rem;
 }
 
+.logo {
+  display: block;
+  margin: 0 auto 1.5rem auto;
+  border-radius: 50%; /* Just in case we want the logo to be circular, but the generated image has a transparent bg */
+}
+
 .title {
   font-size: 1.8rem;
   font-weight: 700;
