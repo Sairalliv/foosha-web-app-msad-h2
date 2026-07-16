@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useActionState } from 'react';
+import Image from 'next/image';
 import styles from './RoleAuth.module.css';
 import { createClient } from '@/lib/supabase/client';
 import { loginAction, registerAction } from '@/actions/auth-actions';
@@ -78,6 +79,13 @@ export function RoleAuth() {
     <div className={styles.container}>
       <div className={styles.authCard}>
         <div className={styles.header}>
+          <Image
+            src="/assets/foosha-logo.png"
+            alt="Foosha Logo"
+            width={712}
+            height={201}
+            className="logo-mark"
+          />
           <h1 className={styles.title}>
             {view === 'login' ? 'Welcome Back' : 'Join Project Foosha'}
           </h1>
