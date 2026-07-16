@@ -774,3 +774,18 @@ footer.site{border-top:1px solid var(--line); padding:40px 0; position:relative;
 @media (max-width: 1100px) {
   .stat-row.admin-stats { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── Keyframe animations ───────────────────────────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes confirmFlash {
+  0%   { background: rgba(143,184,168,0.15); }
+  50%  { background: rgba(143,184,168,0.05); }
+  100% { background: transparent; }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(199,217,77,0.4); }
+  50%      { box-shadow: 0 0 8px 4px rgba(199,217,77,0.1); }
+}
