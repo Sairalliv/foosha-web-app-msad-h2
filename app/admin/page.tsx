@@ -1,4 +1,4 @@
-import { supabaseService } from '@/lib/supabaseService'
+import { getSupabaseService } from '@/lib/supabaseService.server'
 import { OverviewDashboard } from '@/components/admin/OverviewDashboard'
 
 export const metadata = {
@@ -6,6 +6,7 @@ export const metadata = {
 }
 
 export default async function AdminOverviewPage() {
+  const supabaseService = await getSupabaseService()
   const [matchingQueue, verificationFeed, leaderboard] = await Promise.all([
     supabaseService.getMatchingQueue(),
     supabaseService.getVerificationFeed(),

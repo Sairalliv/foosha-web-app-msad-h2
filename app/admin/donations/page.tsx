@@ -1,4 +1,4 @@
-import { supabaseService } from '@/lib/supabaseService'
+import { getSupabaseService } from '@/lib/supabaseService.server'
 import { RecordsTableClient } from '@/components/admin/RecordsTableClient'
 
 export const metadata = {
@@ -6,6 +6,7 @@ export const metadata = {
 }
 
 export default async function DonationsPage() {
+  const supabaseService = await getSupabaseService()
   const donations = await supabaseService.getDonations()
 
   return (

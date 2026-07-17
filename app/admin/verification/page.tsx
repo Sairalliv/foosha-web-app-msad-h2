@@ -1,4 +1,4 @@
-import { supabaseService } from '@/lib/supabaseService'
+import { getSupabaseService } from '@/lib/supabaseService.server'
 import { VerificationClient } from '@/components/admin/VerificationClient'
 
 export const metadata = {
@@ -6,6 +6,7 @@ export const metadata = {
 }
 
 export default async function VerificationPage() {
+  const supabaseService = await getSupabaseService()
   const [feed, eligibilityReview] = await Promise.all([
     supabaseService.getVerificationFeed(),
     supabaseService.getEligibilityReview(),

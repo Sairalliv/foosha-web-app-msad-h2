@@ -1,4 +1,4 @@
-import { createClient } from './supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
   Donation as DbDonation,
   HelpRequest as DbHelpRequest,
@@ -154,12 +154,12 @@ const TIER_LABELS: Record<Priority, string> = {
    the create_match/confirm_match_pickup RPCs re-checking role server-side.
    ───────────────────────────────────────────────────────────────── */
 
-export const supabaseService = {
+export function createSupabaseService(supabase: SupabaseClient) {
+  return {
 
   /* ── READ operations ──────────────────────────────────────────── */
 
   async getDonations(): Promise<Donation[]> {
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('donations')
       .select('*, profiles:donor_id ( full_name )')
@@ -172,7 +172,6 @@ export const supabaseService = {
   },
 
   async getRequests(): Promise<HelpRequest[]> {
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('requests')
       .select('*, profiles:recipient_id ( full_name )')
@@ -185,7 +184,6 @@ export const supabaseService = {
   },
 
   async getMatchingQueue(): Promise<MatchingQueueItem[]> {
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('matches')
       .select(`
@@ -215,7 +213,6 @@ export const supabaseService = {
   },
 
   async getVerificationFeed(): Promise<VerificationItem[]> {
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('matches')
       .select(`
@@ -247,7 +244,6 @@ export const supabaseService = {
   // Requests flagged as a vulnerable tier (elderly/pwd/infant) awaiting
   // document review before their claimed priority is trusted.
   async getEligibilityReview(): Promise<EligibilityReviewItem[]> {
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('requests')
       .select('id, priority_tier, verification_status, created_at, profiles:recipient_id ( full_name )')
@@ -266,7 +262,6 @@ export const supabaseService = {
   },
 
   async getLeaderboard(): Promise<LeaderboardEntry[]> {
-    const supabase = createClient()
     // Aggregate confirmed cash donations per donor. (For a large dataset this
     // is better as a materialized view / RPC — kept as a client-side
     // aggregation here since donation volume is modest.)
@@ -303,7 +298,6 @@ export const supabaseService = {
   // flips both the donation and request to 'matching' — or rolls back
   // entirely if any step fails. See supabase/migrations/0002_admin_matching.sql.
   async createMatch(donationId: string, requestId: string): Promise<DbMatch> {
-    const supabase = createClient()
     const { data, error } = await supabase.rpc('create_match', {
       p_donation_id: donationId,
       p_request_id: requestId,
@@ -314,7 +308,6 @@ export const supabaseService = {
 
   // Redeems the OTP at pickup, confirming the match and closing both sides.
   async confirmMatchPickup(matchId: string, code: string): Promise<DbMatch> {
-    const supabase = createClient()
     const { data, error } = await supabase.rpc('confirm_match_pickup', {
       p_match_id: matchId,
       p_code: code,
@@ -324,7 +317,6 @@ export const supabaseService = {
   },
 
   async approveEligibility(requestId: string): Promise<void> {
-    const supabase = createClient()
     const { error } = await supabase
       .from('requests')
       .update({ verification_status: 'approved' })
@@ -333,11 +325,11 @@ export const supabaseService = {
   },
 
   async requestMoreInfo(requestId: string): Promise<void> {
-    const supabase = createClient()
     const { error } = await supabase
       .from('requests')
       .update({ verification_status: 'needs_info' })
       .eq('id', requestId)
     if (error) throw error
   },
+  }
 }
