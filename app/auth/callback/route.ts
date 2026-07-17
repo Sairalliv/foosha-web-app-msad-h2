@@ -21,7 +21,7 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  // Where to send the user after login (defaults to /dashboard)
+  // Where to send the user after login (if "next" is in param, use it, defaults to /dashboard)
   const next = searchParams.get('next') ?? '/dashboard'
 
   if (code) {
@@ -29,13 +29,22 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
-      // Redirect to the intended destination
-      return NextResponse.redirect(`${origin}${next}`)
+      // Create redirect URL safely
+      const forwardedHost = request.headers.get('x-forwarded-host')
+      const isLocalEnv = process.env.NODE_ENV === 'development'
+      
+      if (isLocalEnv) {
+        return NextResponse.redirect(`${origin}${next}`)
+      } else if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+      } else {
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+    } else {
+      console.error('OAuth Callback Error:', error.message)
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
     }
-
-    console.error('[auth/callback] exchangeCodeForSession error:', error.message)
   }
 
-  // Something went wrong — send to login with an error hint
-  return NextResponse.redirect(`${origin}/login?error=oauth_failed`)
+  return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Invalid authentication code')}`)
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useActionState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import styles from './RoleAuth.module.css';
 import { createClient } from '@/lib/supabase/client';
@@ -14,6 +15,9 @@ const initialState = {
 };
 
 export function RoleAuth() {
+  const searchParams = useSearchParams();
+  const urlError = searchParams?.get('error');
+  
   const [view, setView] = useState<ViewState>('signup');
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -135,6 +139,9 @@ export function RoleAuth() {
 
         {((view === 'signup' && selectedRole) || view === 'login') && (
           <div className={styles.continueWrapper}>
+            {urlError && (
+              <div className={styles.error}>{urlError}</div>
+            )}
             {view === 'signup' && registerState?.error && (
               <div className={styles.error}>{registerState.error}</div>
             )}
