@@ -6,6 +6,9 @@ export const metadata = {
 }
 
 export default async function VerificationPage() {
-  const feed = await supabaseService.getVerificationFeed()
-  return <VerificationClient initialFeed={feed} />
+  const [feed, eligibilityReview] = await Promise.all([
+    supabaseService.getVerificationFeed(),
+    supabaseService.getEligibilityReview(),
+  ])
+  return <VerificationClient initialFeed={feed} initialEligibilityReview={eligibilityReview} />
 }

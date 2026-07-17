@@ -10,8 +10,11 @@
 // ──────────────────────────────────────────────────────────────────
 
 export type DonationType = 'food' | 'cash'
-export type DonationStatus = 'Waiting' | 'Given'
+export type DonationStatus = 'Waiting' | 'matching' | 'Given'
 export type UserRole = 'donor' | 'recipient' | 'admin'
+// Tier-eligibility document review, set by an admin in the Verification Queue.
+// 'pending' = newly flagged elderly/pwd/infant request awaiting document review.
+export type VerificationStatus = 'pending' | 'approved' | 'needs_info'
 
 export interface Profile {
   id: string // matches auth.users.id
@@ -56,6 +59,9 @@ export interface HelpRequest {
   priority_tier: PriorityTier
   address: string
   status: RequestStatus
+  // Only meaningful when priority_tier is elderly/pwd/infant — 'general' requests
+  // don't need document review and can be left null.
+  verification_status: VerificationStatus | null
   created_at: string
 }
 
@@ -64,6 +70,7 @@ export type HelpRequestInsert = Pick<
   'recipient_id' | 'type' | 'description' | 'amount' | 'priority_tier' | 'address'
 > & {
   status?: RequestStatus
+  verification_status?: VerificationStatus | null
 }
 
 export interface Match {
