@@ -21,8 +21,7 @@ export default function LandingPage() {
             <a href="#leaderboard">Leaderboard</a>
           </div>
           <div className="nav-cta">
-            <Link href="/login" className="btn btn-ghost">Log in</Link>
-            <Link href="/register" className="btn btn-primary">Get the app</Link>
+            <Link href="/register" className="btn btn-primary">Sign up</Link>
           </div>
         </nav>
       </header>
