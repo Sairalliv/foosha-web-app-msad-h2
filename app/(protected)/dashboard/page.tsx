@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { DonorDashboard } from '@/components/dashboard/DonorDashboard'
 import { RecipientDashboard } from '@/components/dashboard/RecipientDashboard'
-import { DemoRoleSwitcher } from '@/components/dashboard/DemoRoleSwitcher'
 
 export const metadata = {
   title: 'Dashboard - Foosha',
@@ -31,7 +30,6 @@ export default async function DashboardPage({
 
   return (
     <div className="app">
-      <DemoRoleSwitcher />
       <aside className="sidebar">
         <Image
           className="logo-mark"
