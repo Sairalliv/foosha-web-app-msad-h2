@@ -18,7 +18,7 @@ export function RoleAuth() {
   const searchParams = useSearchParams();
   const urlError = searchParams?.get('error');
   
-  const [view, setView] = useState<ViewState>('signup');
+  const [view, setView] = useState<ViewState>('login');
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
