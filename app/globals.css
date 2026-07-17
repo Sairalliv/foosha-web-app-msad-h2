@@ -267,6 +267,26 @@ h3{font-family:var(--font-display); font-weight:700; font-size:17px;}
 .helper{font-size:12px; color:#6f8377; margin-top:6px;}
 .form-actions{display:flex; gap:12px; margin-top:8px;}
 
+/* ── Vulnerability chips (Request Assistance form) ──────────────── */
+.vuln-grid{display:flex; flex-direction:column; gap:10px;}
+.vuln-chip{position:relative; display:flex; align-items:center; gap:12px; background:var(--bg-deep); border:1.5px solid var(--line); border-radius:9px; padding:13px 16px; cursor:pointer; transition:border-color .2s, background .2s, transform .15s;}
+.vuln-chip:hover{border-color:rgba(244,236,216,0.28); transform:translateY(-1px);}
+.vuln-chip.selected{border-color:var(--kalamansi); background:rgba(199,217,77,0.07);}
+.vuln-chip input{position:absolute; opacity:0; width:0; height:0;}
+.vuln-chip .vuln-icon{flex-shrink:0; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(244,236,216,0.06); color:var(--paper-dim); transition:background .2s, color .2s;}
+.vuln-chip.selected .vuln-icon{background:var(--kalamansi); color:var(--bg-deep);}
+.vuln-chip .vuln-label{flex:1; font-size:14px; font-weight:500; color:var(--paper);}
+.vuln-chip .vuln-check{width:20px; height:20px; border-radius:50%; border:1.5px solid var(--line); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--bg-deep); transition:background .2s, border-color .2s, transform .15s; transform:scale(0.9);}
+.vuln-chip.selected .vuln-check{background:var(--kalamansi); border-color:var(--kalamansi); transform:scale(1);}
+
+/* ── Leading-icon field inputs (address / location) ─────────────── */
+.field .input-icon-wrap{position:relative;}
+.field .input-icon-wrap svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--paper-dim); pointer-events:none;}
+.field .input-icon-wrap input{padding-left:40px;}
+
+/* ── Modal segmented type toggle: helper caption under active tab ── */
+.type-toggle-caption{font-size:12.5px; color:var(--paper-dim); margin:-12px 0 20px; display:flex; align-items:center; gap:6px;}
+
 /* ── Listings (recipient browse) ───────────────────────────────── */
 .listing-card{background:var(--bg-deep); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:12px; transition:border-color .2s, transform .15s;}
 .listing-card:hover{border-color:rgba(244,236,216,0.22); transform:translateY(-1px);}
@@ -775,7 +795,18 @@ footer.site{border-top:1px solid var(--line); padding:40px 0; position:relative;
   .stat-row.admin-stats { grid-template-columns: 1fr 1fr; }
 }
 
-/* ── Keyframe animations ───────────────────────────────────────── */
+/* ── Modal (Make a Donation / Request Assistance) ──────────────── */
+.modal-close-btn{position:absolute; top:20px; right:20px; width:34px; height:34px; border-radius:50%; background:rgba(244,236,216,0.06); border:1px solid var(--line); color:var(--paper-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .2s, color .2s, border-color .2s; z-index:2;}
+.modal-close-btn:hover{background:rgba(244,236,216,0.12); color:var(--paper); border-color:rgba(244,236,216,0.25);}
+.modal-header{padding:32px 32px 0 32px;}
+.modal-header .icon-badge{width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:18px;}
+.modal-header.jeepney-theme .icon-badge{background:rgba(232,84,47,0.14); color:var(--jeepney);}
+.modal-header.kalamansi-theme .icon-badge{background:rgba(199,217,77,0.14); color:var(--kalamansi);}
+.modal-header h2{margin-bottom:8px; padding-right:36px;}
+.modal-body{padding:24px 32px 32px 32px;}
+.modal-body .form-actions{border-top:1px solid var(--line); padding-top:20px; margin-top:4px; justify-content:flex-end;}
+.tier-note{font-size:12.5px; color:var(--paper-dim); margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
