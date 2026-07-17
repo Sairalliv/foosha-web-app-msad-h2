@@ -67,8 +67,8 @@ export default async function DashboardPage({
       </aside>
 
       <main>
-        {effectiveRole === 'donor' && <DonorDashboard displayName={displayName} initials={initials} />}
-        {effectiveRole === 'recipient' && <RecipientDashboard displayName={displayName} initials={initials} />}
+        {effectiveRole === 'donor' && <DonorDashboard />}
+        {effectiveRole === 'recipient' && <RecipientDashboard />}
         {effectiveRole === 'admin' && (
           <div>
             <div className="welcome-card mb-8">
