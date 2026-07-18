@@ -1,7 +1,18 @@
-import { createClient } from './supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type {
+  Donation as DbDonation,
+  HelpRequest as DbHelpRequest,
+  Match as DbMatch,
+  Profile,
+} from './supabase/types'
 
 /* ─────────────────────────────────────────────────────────────────
-   Types
+   UI-facing types
+   These are kept intentionally separate from the DB row shapes in
+   ./supabase/types.ts — the components in components/admin/* were
+   built against these friendlier field names (donor, item,
+   neighborhood, requestor, need, ...), and translating at the edge
+   here means none of them need to change as the schema evolves.
    ───────────────────────────────────────────────────────────────── */
 export type DonationType = 'food' | 'cash'
 export type DonationStatus = 'Available' | 'Matched' | 'Confirmed'
@@ -35,6 +46,7 @@ export interface HelpRequest {
   date: string
   otpCode?: string
   matchedDonor?: string
+  verificationStatus?: 'pending' | 'approved' | 'needs_info' | null
 }
 
 export interface MatchingQueueItem {
@@ -56,6 +68,14 @@ export interface VerificationItem {
   time: string
 }
 
+export interface EligibilityReviewItem {
+  id: string // request id
+  name: string // requestor's display name
+  type: string // e.g. "Elderly · Tier 1"
+  uploaded: string // relative time string
+  status: 'pending' | 'approved' | 'needs_info'
+}
+
 export interface LeaderboardEntry {
   rank: number
   name: string
@@ -64,150 +84,252 @@ export interface LeaderboardEntry {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   Mock data — Mandaue City flavor
+   Mapping helpers: DB row <-> UI-facing shape
    ───────────────────────────────────────────────────────────────── */
 
-const MATCHING_QUEUE: MatchingQueueItem[] = [
-  { id: 'MC-0512', requestor: 'Lola Remedios Canoy', priority: 'elderly', donor: 'Basak Sari-Sari Store', item: 'Rice (5kg), Canned Sardines ×4', kind: 'food', status: 'pending' },
-  { id: 'MC-0513', requestor: 'Baby Althea Fernandez', priority: 'infant', donor: 'Tipolo Bakeshop', item: 'Powdered Milk ×3, Cerelac ×2', kind: 'food', status: 'pending' },
-  { id: 'MC-0514', requestor: 'Roberto Escaño (PWD)', priority: 'pwd', donor: 'Dela Peña Family', item: '₱1,500 Cash Assistance', kind: 'cash', status: 'dispatched' },
-  { id: 'MC-0515', requestor: 'Garcia Household', priority: 'general', donor: 'Subangdaku Rotary Club', item: 'Rice (10kg), Cooking Oil ×2', kind: 'food', status: 'pending' },
-  { id: 'MC-0516', requestor: 'Lolo Vicente Daan', priority: 'elderly', donor: 'M. Fernandez', item: '₱800 Cash Assistance', kind: 'cash', status: 'dispatched' },
-]
+const donationStatusToUi: Record<DbDonation['status'], DonationStatus> = {
+  Waiting: 'Available',
+  matching: 'Matched',
+  Given: 'Confirmed',
+}
 
-const VERIFICATION_FEED: VerificationItem[] = [
-  { id: 'MC-0498', donor: 'Basak Sari-Sari Store', recipient: 'P. Ramos household', item: 'Rice, canned goods, milk', code: '7Q3K', time: '2 min ago' },
-  { id: 'MC-0496', donor: 'Anonymous cash gift', recipient: 'Lolo Vicente, 74', item: '₱1,200 Cash', code: '9XM2', time: '18 min ago' },
-  { id: 'MC-0493', donor: 'Dela Peña Family', recipient: 'Marcelo Household', item: 'Rice (5kg), cooking oil', code: 'A4KN', time: '45 min ago' },
-  { id: 'MC-0491', donor: 'Tipolo Bakeshop', recipient: 'Baby Jenna Cruz', item: 'Powdered Milk ×2, bread', code: 'R8PQ', time: '1 hr ago' },
-]
+const requestStatusToUi: Record<DbHelpRequest['status'], RequestStatus> = {
+  unmatched: 'Pending',
+  matching: 'Matched',
+  confirmed: 'Confirmed',
+}
 
-const LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, name: 'Basak Sari-Sari Store', amount: '₱18,400', badges: ['bayani', 'first'] },
-  { rank: 2, name: 'Dela Peña Family', amount: '₱11,050', badges: ['first'] },
-  { rank: 3, name: 'Tipolo Bakeshop', amount: '₱7,900', badges: ['first'] },
-  { rank: 4, name: 'Subangdaku Rotary Club', amount: '₱6,200', badges: [] },
-  { rank: 5, name: 'M. Fernandez', amount: '₱4,850', badges: [] },
-]
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins} min ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs} hr ago`
+  const days = Math.floor(hrs / 24)
+  return `${days} day${days === 1 ? '' : 's'} ago`
+}
 
-const DONATIONS: Donation[] = [
-  { id: 'D-101', donor: 'You', type: 'cash', item: '₱5,000 Cash', neighborhood: 'Basak', status: 'Available', date: '2026-07-15' },
-  { id: 'D-102', donor: 'You', type: 'food', item: 'Assorted Bread (20 pcs)', quantity: '20', neighborhood: 'Tipolo', status: 'Matched', date: '2026-07-14' },
-  { id: 'D-103', donor: 'You', type: 'food', item: 'Rice (50kg)', quantity: '50', neighborhood: 'Subangdaku', status: 'Confirmed', date: '2026-07-13' },
-  { id: 'D-104', donor: 'You', type: 'cash', item: '₱2,500 Cash', neighborhood: 'Ibabao', status: 'Available', date: '2026-07-16' },
-]
+function mapDonation(row: DbDonation, donorName?: string | null): Donation {
+  const isCash = row.type === 'cash'
+  return {
+    id: row.id,
+    donor: donorName || 'Unknown donor',
+    type: row.type,
+    item: isCash ? `₱${row.amount ?? 0} Cash` : row.description || 'Food donation',
+    amount: row.amount != null ? String(row.amount) : undefined,
+    neighborhood: row.location || 'Unspecified',
+    status: donationStatusToUi[row.status],
+    date: row.created_at?.split('T')[0] ?? '',
+  }
+}
 
-const REQUESTS: HelpRequest[] = [
-  { id: 'R-201', requestor: 'Your Household', need: 'Food & Cash', priority: 'elderly', barangay: 'Basak', neighborhood: 'Basak', familySize: 4, items: '5kg Rice, canned goods, cooking oil', status: 'Matched', date: '2026-07-16', otpCode: 'FS-8842', matchedDonor: 'Basak Sari-Sari Store' },
-  { id: 'R-202', requestor: 'Your Household', need: 'Milk & Baby Supplies', priority: 'infant', barangay: 'Tipolo', neighborhood: 'Tipolo', familySize: 5, items: 'Powdered Milk, Cerelac, Diapers', status: 'Pending', date: '2026-07-15' },
-  { id: 'R-203', requestor: 'Your Household', need: 'Cash Assistance', priority: 'pwd', barangay: 'Subangdaku', neighborhood: 'Subangdaku', familySize: 3, items: '₱1,500 for medication', status: 'Confirmed', date: '2026-07-12', otpCode: 'FS-3391', matchedDonor: 'Dela Peña Family' },
-]
+function mapRequest(row: DbHelpRequest, requestorName?: string | null): HelpRequest {
+  const isCash = row.type === 'cash'
+  return {
+    id: row.id,
+    requestor: requestorName || 'Unknown household',
+    need: isCash ? 'Cash Assistance' : row.description || 'Food assistance',
+    priority: row.priority_tier,
+    barangay: row.address,
+    neighborhood: row.address,
+    items: row.description || undefined,
+    status: requestStatusToUi[row.status],
+    date: row.created_at?.split('T')[0] ?? '',
+    verificationStatus: row.verification_status,
+  }
+}
+
+const TIER_LABELS: Record<Priority, string> = {
+  elderly: 'Elderly · Tier 1',
+  pwd: 'PWD · Tier 1',
+  infant: 'Infant / Young Child · Tier 1',
+  general: 'General Household · Tier 2',
+}
 
 /* ─────────────────────────────────────────────────────────────────
-   Service layer — swap mock implementations for real Supabase
-   queries once the database schema is finalized.
+   Service layer — admin reads ignore per-user session scope and
+   pull global tables directly. This relies on the caller having the
+   'admin' role, enforced both by RLS policies on these tables and by
+   the create_match/confirm_match_pickup RPCs re-checking role server-side.
    ───────────────────────────────────────────────────────────────── */
 
-// In-memory stores so that newly created items appear instantly
-let localDonations = [...DONATIONS]
-let localRequests = [...REQUESTS]
-
-export const supabaseService = {
+export function createSupabaseService(supabase: SupabaseClient) {
+  return {
 
   /* ── READ operations ──────────────────────────────────────────── */
 
-  async getMatchingQueue(): Promise<MatchingQueueItem[]> {
-    // const supabase = createClient()
-    // const { data, error } = await supabase.from('matches').select('*').order('created_at', { ascending: false })
-    // if (error) throw error
-    // return data
-    return [...MATCHING_QUEUE]
-  },
-
-  async getVerificationFeed(): Promise<VerificationItem[]> {
-    return [...VERIFICATION_FEED]
-  },
-
-  async getLeaderboard(): Promise<LeaderboardEntry[]> {
-    return [...LEADERBOARD]
-  },
-
   async getDonations(): Promise<Donation[]> {
-    return [...localDonations]
+    const { data, error } = await supabase
+      .from('donations')
+      .select('*, profiles:donor_id ( full_name )')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data ?? []).map((row: any) =>
+      mapDonation(row as DbDonation, (row.profiles as Profile | null)?.full_name)
+    )
   },
 
   async getRequests(): Promise<HelpRequest[]> {
-    return [...localRequests]
+    const { data, error } = await supabase
+      .from('requests')
+      .select('*, profiles:recipient_id ( full_name )')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data ?? []).map((row: any) =>
+      mapRequest(row as DbHelpRequest, (row.profiles as Profile | null)?.full_name)
+    )
+  },
+
+  async getMatchingQueue(): Promise<MatchingQueueItem[]> {
+    const { data, error } = await supabase
+      .from('matches')
+      .select(`
+        id,
+        status,
+        donations:donation_id ( type, description, amount, profiles:donor_id ( full_name ) ),
+        requests:request_id ( priority_tier, profiles:recipient_id ( full_name ) )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (error) throw error
+    return (data ?? []).map((row: any) => {
+      const donation = row.donations
+      const request = row.requests
+      const isCash = donation?.type === 'cash'
+      return {
+        id: row.id,
+        requestor: request?.profiles?.full_name || 'Unknown household',
+        priority: request?.priority_tier || 'general',
+        donor: donation?.profiles?.full_name || 'Unknown donor',
+        item: isCash ? `₱${donation?.amount ?? 0} Cash Assistance` : donation?.description || 'Food donation',
+        kind: isCash ? 'cash' : 'food',
+        status: row.status === 'confirmed' ? 'dispatched' : 'pending',
+      }
+    })
+  },
+
+  async getVerificationFeed(): Promise<VerificationItem[]> {
+    const { data, error } = await supabase
+      .from('matches')
+      .select(`
+        id,
+        verification_code,
+        created_at,
+        donations:donation_id ( type, description, amount, profiles:donor_id ( full_name ) ),
+        requests:request_id ( profiles:recipient_id ( full_name ) )
+      `)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(10)
+
+    if (error) throw error
+    return (data ?? []).map((row: any) => {
+      const donation = row.donations
+      const isCash = donation?.type === 'cash'
+      return {
+        id: row.id,
+        donor: donation?.profiles?.full_name || 'Unknown donor',
+        recipient: row.requests?.profiles?.full_name || 'Unknown household',
+        item: isCash ? `₱${donation?.amount ?? 0} Cash` : donation?.description || 'Food donation',
+        code: row.verification_code,
+        time: relativeTime(row.created_at),
+      }
+    })
+  },
+
+  // Requests flagged as a vulnerable tier (elderly/pwd/infant) awaiting
+  // document review before their claimed priority is trusted.
+  async getEligibilityReview(): Promise<EligibilityReviewItem[]> {
+    const { data, error } = await supabase
+      .from('requests')
+      .select('id, priority_tier, verification_status, created_at, profiles:recipient_id ( full_name )')
+      .in('priority_tier', ['elderly', 'pwd', 'infant'])
+      .eq('verification_status', 'pending')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data ?? []).map((row: any) => ({
+      id: row.id,
+      name: row.profiles?.full_name || 'Unknown household',
+      type: TIER_LABELS[row.priority_tier as Priority] || row.priority_tier,
+      uploaded: relativeTime(row.created_at),
+      status: row.verification_status,
+    }))
+  },
+
+  async getLeaderboard(): Promise<LeaderboardEntry[]> {
+    // Aggregate confirmed cash donations per donor. (For a large dataset this
+    // is better as a materialized view / RPC — kept as a client-side
+    // aggregation here since donation volume is modest.)
+    const { data, error } = await supabase
+      .from('donations')
+      .select('donor_id, amount, type, status, profiles:donor_id ( full_name )')
+      .eq('status', 'Given')
+
+    if (error) throw error
+
+    const totals = new Map<string, { name: string; total: number }>()
+    for (const row of (data ?? []) as any[]) {
+      const amount = row.type === 'cash' ? Number(row.amount ?? 0) : 0
+      const key = row.donor_id
+      const name = row.profiles?.full_name || 'Anonymous donor'
+      const existing = totals.get(key)
+      totals.set(key, { name, total: (existing?.total ?? 0) + amount })
+    }
+
+    return Array.from(totals.values())
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5)
+      .map((entry, i) => ({
+        rank: i + 1,
+        name: entry.name,
+        amount: `₱${entry.total.toLocaleString()}`,
+        badges: i === 0 ? ['bayani'] : [],
+      }))
   },
 
   /* ── WRITE operations ─────────────────────────────────────────── */
 
-  async createDonation(data: {
-    type: DonationType
-    item: string
-    amount?: string
-    quantity?: string
-    expiry?: string
-    pickup?: string
-    neighborhood?: string
-  }): Promise<Donation> {
-    // const supabase = createClient()
-    // const { data: row, error } = await supabase.from('donations').insert([data]).select().single()
-    // if (error) throw error
-    // return row
-
-    const newDonation: Donation = {
-      id: `D-${Date.now().toString().slice(-4)}`,
-      donor: 'You',
-      type: data.type,
-      item: data.type === 'cash' ? `₱${data.amount} Cash` : data.item,
-      amount: data.amount,
-      quantity: data.quantity,
-      expiry: data.expiry,
-      pickup: data.pickup,
-      neighborhood: data.neighborhood || 'Basak',
-      status: 'Available',
-      date: new Date().toISOString().split('T')[0],
-    }
-    localDonations = [newDonation, ...localDonations]
-    return newDonation
+  // Transactional: inserts the match row with a freshly generated OTP and
+  // flips both the donation and request to 'matching' — or rolls back
+  // entirely if any step fails. See supabase/migrations/0002_admin_matching.sql.
+  async createMatch(donationId: string, requestId: string): Promise<DbMatch> {
+    const { data, error } = await supabase.rpc('create_match', {
+      p_donation_id: donationId,
+      p_request_id: requestId,
+    })
+    if (error) throw error
+    return data as DbMatch
   },
 
-  async createRequest(data: {
-    need: string
-    priority: Priority
-    barangay: string
-    familySize?: number
-    items?: string
-  }): Promise<HelpRequest> {
-    // const supabase = createClient()
-    // const { data: row, error } = await supabase.from('requests').insert([data]).select().single()
-    // if (error) throw error
-    // return row
-
-    const newRequest: HelpRequest = {
-      id: `R-${Date.now().toString().slice(-4)}`,
-      requestor: 'Your Household',
-      need: data.need,
-      priority: data.priority,
-      barangay: data.barangay,
-      neighborhood: data.barangay,
-      familySize: data.familySize,
-      items: data.items,
-      status: 'Pending',
-      date: new Date().toISOString().split('T')[0],
-    }
-    localRequests = [newRequest, ...localRequests]
-    return newRequest
+  // Redeems the OTP at pickup, confirming the match and closing both sides.
+  async confirmMatchPickup(matchId: string, code: string): Promise<DbMatch> {
+    const { data, error } = await supabase.rpc('confirm_match_pickup', {
+      p_match_id: matchId,
+      p_code: code,
+    })
+    if (error) throw error
+    return data as DbMatch
   },
 
-  async createMatch(donationId: string, requestId: string) {
-    console.log(`Matching donation ${donationId} with request ${requestId}`)
-    return { success: true }
+  async approveEligibility(requestId: string): Promise<void> {
+    const { error } = await supabase
+      .from('requests')
+      .update({ verification_status: 'approved' })
+      .eq('id', requestId)
+    if (error) throw error
   },
 
-  async verifyOTP(ticketId: string, code: string) {
-    console.log(`Verifying ticket ${ticketId} with code ${code}`)
-    return { success: true }
+  async requestMoreInfo(requestId: string): Promise<void> {
+    const { error } = await supabase
+      .from('requests')
+      .update({ verification_status: 'needs_info' })
+      .eq('id', requestId)
+    if (error) throw error
   },
+  }
 }

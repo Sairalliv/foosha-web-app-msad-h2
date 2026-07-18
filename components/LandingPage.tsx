@@ -22,8 +22,7 @@ export default function LandingPage() {
             <Link href="/map">Donation Map</Link>
           </div>
           <div className="nav-cta">
-            <Link href="/login" className="btn btn-ghost">Log in</Link>
-            <Link href="/register" className="btn btn-primary">Get the app</Link>
+            <Link href="/register" className="btn btn-primary">Sign up</Link>
           </div>
         </nav>
       </header>

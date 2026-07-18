@@ -2,6 +2,7 @@
 
 import React, { useState, useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import styles from './RoleAuth.module.css';
 import { createClient } from '@/lib/supabase/client';
 import { loginAction, registerAction } from '@/actions/auth-actions';
@@ -17,7 +18,7 @@ export function RoleAuth() {
   const searchParams = useSearchParams();
   const urlError = searchParams?.get('error');
   
-  const [view, setView] = useState<ViewState>('signup');
+  const [view, setView] = useState<ViewState>('login');
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 

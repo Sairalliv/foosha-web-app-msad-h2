@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabaseService } from '@/lib/supabaseService'
+import { getSupabaseService } from '@/lib/supabaseService.client'
 
 type Donation = any
 type Request = any
@@ -15,6 +15,7 @@ export function MatchingQueueClient({ initialDonations, initialRequests }: { ini
     if (!selectedDonation || !selectedRequest) return
     setIsMatching(true)
     try {
+      const supabaseService = getSupabaseService()
       await supabaseService.createMatch(selectedDonation.id, selectedRequest.id)
       alert('Match confirmed successfully!')
       setSelectedDonation(null)

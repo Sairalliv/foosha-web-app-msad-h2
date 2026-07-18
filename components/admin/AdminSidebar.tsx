@@ -44,7 +44,7 @@ export function AdminSidebar({ adminName, adminInitials }: { adminName: string, 
   const pathname = usePathname()
 
   return (
-    <aside className="sidebar" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '240px', background: 'var(--bg-deep)', borderRight: '1px solid var(--line)', padding: '26px 20px', display: 'flex', flexDirection: 'column' }}>
+    <aside className="sidebar" style={{ width: '240px', flexShrink: 0, background: 'var(--bg-deep)', borderRight: '1px solid var(--line)', padding: '26px 20px', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
       <div style={{ marginBottom: 40 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--paper)', margin: 0, lineHeight: 1 }}>Foosha</h1>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '1px', color: 'var(--kalamansi)', marginTop: 4 }}>

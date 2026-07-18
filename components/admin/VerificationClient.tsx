@@ -1,16 +1,53 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useTransition } from 'react'
+import { getSupabaseService } from '@/lib/supabaseService.client'
+import type { EligibilityReviewItem } from '@/lib/supabaseService'
 
-export function VerificationClient({ initialFeed }: { initialFeed: any[] }) {
+export function VerificationClient({
+  initialFeed,
+  initialEligibilityReview,
+}: {
+  initialFeed: any[]
+  initialEligibilityReview: EligibilityReviewItem[]
+}) {
   const [feed] = useState(initialFeed)
-  
-  const handleApprove = (name: string) => {
-    alert(`Approved eligibility for ${name}`)
+  const [eligibility, setEligibility] = useState(initialEligibilityReview)
+  const [pendingId, startTransition] = useTransition()
+  const [busyId, setBusyId] = useState<string | null>(null)
+
+  const handleApprove = (id: string) => {
+    setBusyId(id)
+    startTransition(async () => {
+      try {
+        const supabaseService = getSupabaseService()
+        await supabaseService.approveEligibility(id)
+        setEligibility((prev) => prev.filter((item) => item.id !== id))
+      } catch (e) {
+        console.error(e)
+        alert('Failed to approve — please try again.')
+      } finally {
+        setBusyId(null)
+      }
+    })
   }
 
-  const handleRequestInfo = (name: string) => {
-    alert(`Requested more info from ${name}`)
+  const handleRequestInfo = (id: string) => {
+    setBusyId(id)
+    startTransition(async () => {
+      try {
+        const supabaseService = getSupabaseService()
+        await supabaseService.requestMoreInfo(id)
+        setEligibility((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, status: 'needs_info' } : item))
+        )
+      } catch (e) {
+        console.error(e)
+        alert('Failed to request more info — please try again.')
+      } finally {
+        setBusyId(null)
+      }
+    })
   }
 
   return (
@@ -66,37 +103,49 @@ export function VerificationClient({ initialFeed }: { initialFeed: any[] }) {
           </div>
           
           <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {[
-              { id: 'REV-001', name: 'Maria Santos', type: 'PWD ID Verification', uploaded: '2 hours ago', status: 'Pending Review' },
-              { id: 'REV-002', name: 'John Doe', type: 'Senior Citizen Card', uploaded: '5 hours ago', status: 'Pending Review' },
-            ].map(doc => (
-              <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.15)', padding: '20px', borderRadius: '8px', border: '1px solid var(--line)' }}>
-                <div style={{ display: 'flex', gap: '20px' }}>
-                  <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--paper-dim)' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--paper)', marginBottom: '4px' }}>{doc.name}</div>
-                    <div style={{ fontSize: '13px', color: 'var(--paper-dim)' }}>{doc.type} • Uploaded {doc.uploaded}</div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <button 
-                    onClick={() => handleRequestInfo(doc.name)}
-                    style={{ background: 'transparent', color: 'var(--paper)', border: '1px solid var(--line)', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
-                  >
-                    Request Info
-                  </button>
-                  <button 
-                    onClick={() => handleApprove(doc.name)}
-                    style={{ background: 'var(--kalamansi)', color: 'var(--bg-deep)', border: 'none', padding: '8px 20px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    Approve
-                  </button>
-                </div>
+            {eligibility.length === 0 && (
+              <div style={{ color: 'var(--paper-dim)', fontSize: '14px', textAlign: 'center', padding: '20px 0' }}>
+                No pending eligibility reviews.
               </div>
-            ))}
+            )}
+            {eligibility.map(doc => {
+              const isBusy = pendingId && busyId === doc.id
+              return (
+                <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.15)', padding: '20px', borderRadius: '8px', border: '1px solid var(--line)' }}>
+                  <div style={{ display: 'flex', gap: '20px' }}>
+                    <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--paper-dim)' }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--paper)', marginBottom: '4px' }}>{doc.name}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--paper-dim)' }}>
+                        {doc.type} • Flagged {doc.uploaded}
+                        {doc.status === 'needs_info' && (
+                          <span style={{ color: 'var(--jeepney)', marginLeft: 8 }}>• Info requested</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button
+                      onClick={() => handleRequestInfo(doc.id)}
+                      disabled={!!isBusy}
+                      style={{ background: 'transparent', color: 'var(--paper)', border: '1px solid var(--line)', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: isBusy ? 'not-allowed' : 'pointer', opacity: isBusy ? 0.5 : 1 }}
+                    >
+                      Request Info
+                    </button>
+                    <button
+                      onClick={() => handleApprove(doc.id)}
+                      disabled={!!isBusy}
+                      style={{ background: 'var(--kalamansi)', color: 'var(--bg-deep)', border: 'none', padding: '8px 20px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: isBusy ? 'not-allowed' : 'pointer', opacity: isBusy ? 0.5 : 1 }}
+                    >
+                      {isBusy ? 'Working…' : 'Approve Tier Status'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
