@@ -19,6 +19,7 @@ export default function LandingPage() {
             <a href="#how-it-works">How it works</a>
             <a href="#trust-codes">Trust &amp; codes</a>
             <a href="#leaderboard">Leaderboard</a>
+            <Link href="/map">Donation Map</Link>
           </div>
           <div className="nav-cta">
             <Link href="/login" className="btn btn-ghost">Log in</Link>
