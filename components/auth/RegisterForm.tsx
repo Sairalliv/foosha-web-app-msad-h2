@@ -46,11 +46,15 @@ export function RegisterForm() {
     setIsGoogleLoading(true)
     const supabase = createClient()
 
+    // `role` needs to travel through the OAuth round trip so our callback
+    // route can save it — options.queryParams only gets sent to Google's
+    // authorization request and never comes back to us. Putting it on the
+    // redirectTo URL works because Supabase preserves that URL (including
+    // its query string) and calls it again after the provider redirects back.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: { role },
+        redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
       },
     })
 
@@ -76,7 +80,7 @@ export function RegisterForm() {
             Every extra plate finds <em>the right</em> table.
           </h2>
           <p className="sub">
-            Join Mandaue City&apos;s food assistance network — give, receive, and make sure every
+            Join Cebu City&apos;s food assistance network — give, receive, and make sure every
             handoff is verified with a one-time code.
           </p>
 
@@ -101,7 +105,7 @@ export function RegisterForm() {
         <div className="auth-form-wrap">
           <div className="eyebrow">Join the network</div>
           <h1>Create your account</h1>
-          <p className="sub">Start giving or receiving food assistance in Mandaue City.</p>
+          <p className="sub">Start giving or receiving food assistance in Cebu City.</p>
 
           {state?.error && <div className="auth-error">{state.error}</div>}
 

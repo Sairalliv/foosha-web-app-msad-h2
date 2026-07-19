@@ -3,24 +3,21 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import {
-  AlertTriangle,
   Package,
   Banknote,
-  CheckCircle2,
   Clock,
   ChevronRight,
   ShieldAlert
 } from 'lucide-react'
-
-// Types based on the mock data
-type MatchingQueueItem = any
-type VerificationFeedItem = any
-type LeaderboardItem = any
+import { getSupabaseService } from '@/lib/supabaseService.client'
+import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
+import type { MatchingQueueItem, VerificationItem, LeaderboardEntry, OverviewStats } from '@/lib/supabaseService'
 
 interface Props {
   initialMatchingQueue: MatchingQueueItem[]
-  initialVerificationFeed: VerificationFeedItem[]
-  initialLeaderboard: LeaderboardItem[]
+  initialVerificationFeed: VerificationItem[]
+  initialLeaderboard: LeaderboardEntry[]
+  stats: OverviewStats
 }
 
 function BadgeIcons({ badges }: { badges: string[] }) {
@@ -49,16 +46,31 @@ function BadgeIcons({ badges }: { badges: string[] }) {
   )
 }
 
-export function OverviewDashboard({ initialMatchingQueue, initialVerificationFeed, initialLeaderboard }: Props) {
+export function OverviewDashboard({ initialMatchingQueue, initialVerificationFeed, initialLeaderboard, stats }: Props) {
+  const [verificationFeed, setVerificationFeed] = useState(initialVerificationFeed)
   const [otpCodes, setOtpCodes] = useState<Record<string, string>>({})
+  const [verifyingId, setVerifyingId] = useState<string | null>(null)
+  const [verifyError, setVerifyError] = useState<string | null>(null)
 
-  const handleVerify = (id: string) => {
+  const handleVerify = async (id: string) => {
     const code = otpCodes[id]
-    if (code) {
-      alert(`Verifying OTP ${code} for transaction ${id}`)
-      setOtpCodes(prev => ({ ...prev, [id]: '' }))
+    if (!code) return
+    setVerifyingId(id)
+    setVerifyError(null)
+    try {
+      const supabaseService = getSupabaseService()
+      await supabaseService.confirmMatchPickup(id, code)
+      setVerificationFeed((prev) => prev.filter((item) => item.id !== id))
+      setOtpCodes((prev) => ({ ...prev, [id]: '' }))
+    } catch (e) {
+      console.error(e)
+      setVerifyError('That code is invalid or already used. Double-check and try again.')
+    } finally {
+      setVerifyingId(null)
     }
   }
+
+  const todayLabel = new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -66,7 +78,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600, marginBottom: '8px' }}>
-            <Clock size={14} /> Live overview &middot; July 2026
+            <Clock size={14} /> Live overview &middot; {todayLabel}
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', margin: '0 0 8px 0', color: 'var(--paper)' }}>Logistics &amp; Verification</h1>
           <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>Supply, demand, and delivery status across all barangays.</p>
@@ -98,17 +110,17 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
         <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <h4 style={{ fontSize: '14px', color: 'var(--paper-dim)', fontWeight: 500, margin: '0 0 16px 0' }}>Total Active Requests</h4>
           <div style={{ fontSize: '56px', fontWeight: 700, color: 'var(--jeepney)', lineHeight: 1, marginBottom: '24px', fontFamily: 'var(--font-display)' }}>
-            3
+            {stats.activeRequests}
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(199, 217, 77, 0.1)', color: 'var(--kalamansi)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
-              elderly 1
+              elderly {stats.activeByTier.elderly}
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(232, 84, 47, 0.1)', color: 'var(--jeepney)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
-              PWD 1
+              PWD {stats.activeByTier.pwd}
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(143, 184, 168, 0.1)', color: 'var(--teal)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
-              infant 1
+              infant {stats.activeByTier.infant}
             </span>
           </div>
         </div>
@@ -122,7 +134,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                 <Package size={24} />
               </div>
               <div>
-                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--paper)', lineHeight: 1, marginBottom: '4px' }}>147</div>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--paper)', lineHeight: 1, marginBottom: '4px' }}>{stats.foodDonationsCount}</div>
                 <div style={{ fontSize: '13px', color: 'var(--paper-dim)' }}>Food Items</div>
               </div>
             </div>
@@ -131,7 +143,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                 <Banknote size={24} />
               </div>
               <div>
-                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--paper)', lineHeight: 1, marginBottom: '4px' }}>₱88.0K</div>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--paper)', lineHeight: 1, marginBottom: '4px' }}>₱{stats.cashTotal.toLocaleString()}</div>
                 <div style={{ fontSize: '13px', color: 'var(--paper-dim)' }}>Cash Total</div>
               </div>
             </div>
@@ -153,12 +165,12 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                   fill="none" 
                   stroke="var(--kalamansi)" 
                   strokeWidth="12" 
-                  strokeDasharray={`${0.5 * 2 * Math.PI * 40} ${2 * Math.PI * 40}`}
+                  strokeDasharray={`${(stats.deliveredPercent / 100) * 2 * Math.PI * 40} ${2 * Math.PI * 40}`}
                   strokeLinecap="round"
                 />
               </svg>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--paper)', lineHeight: 1 }}>50%</span>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--paper)', lineHeight: 1 }}>{stats.deliveredPercent}%</span>
                 <span style={{ fontSize: '10px', color: 'var(--paper-dim)', textTransform: 'uppercase' }}>Delivered</span>
               </div>
             </div>
@@ -177,6 +189,14 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
           </div>
         </div>
       </div>
+
+      {/* Donation Locations Map */}
+      <NearbyMapPanel
+        title="Donation Locations"
+        subtitle="City-wide view of donation centers, pantries, and NGOs currently on the map."
+        height={360}
+        withTopMargin={false}
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -198,8 +218,8 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                 </tr>
               </thead>
               <tbody>
-                {initialMatchingQueue.slice(0, 4).map((row: any, i: number) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--line)' }}>
+              {initialMatchingQueue.slice(0, 4).map((row) => (
+                  <tr key={row.id} style={{ borderBottom: '1px solid var(--line)' }}>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ fontWeight: 500, color: 'var(--paper)', marginBottom: '4px' }}>{row.requestor}</div>
                       <span style={{ 
@@ -254,7 +274,15 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
               </Link>
             </div>
             <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {initialVerificationFeed.slice(0, 3).map((item: any) => (
+              {verificationFeed.length === 0 && (
+                <div style={{ color: 'var(--paper-dim)', fontSize: '13px', textAlign: 'center', padding: '12px 0' }}>
+                  No pending pickups awaiting verification.
+                </div>
+              )}
+              {verifyError && (
+                <div style={{ color: '#fbbf24', fontSize: '12px' }}>{verifyError}</div>
+              )}
+              {verificationFeed.slice(0, 3).map((item) => (
                 <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.1)', padding: '12px 16px', borderRadius: '8px' }}>
                   <div>
                     <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--paper)', marginBottom: '4px' }}>{item.recipient}</div>
@@ -264,7 +292,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                     <input 
                       type="text" 
                       placeholder="Enter OTP"
-                      maxLength={4}
+                      maxLength={6}
                       value={otpCodes[item.id] || ''}
                       onChange={(e) => setOtpCodes(prev => ({ ...prev, [item.id]: e.target.value.toUpperCase() }))}
                       style={{ 
@@ -281,7 +309,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                     />
                     <button 
                       onClick={() => handleVerify(item.id)}
-                      disabled={!otpCodes[item.id] || otpCodes[item.id].length < 4}
+                      disabled={!otpCodes[item.id] || verifyingId === item.id}
                       style={{ 
                         background: 'var(--jeepney)', 
                         color: 'white', 
@@ -290,10 +318,10 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                         borderRadius: '4px', 
                         fontWeight: 600,
                         cursor: 'pointer',
-                        opacity: (!otpCodes[item.id] || otpCodes[item.id].length < 4) ? 0.5 : 1
+                        opacity: (!otpCodes[item.id] || verifyingId === item.id) ? 0.5 : 1
                       }}
                     >
-                      Verify
+                      {verifyingId === item.id ? 'Verifying…' : 'Verify'}
                     </button>
                   </div>
                 </div>
@@ -309,7 +337,12 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
             <p style={{ fontSize: '13px', color: 'var(--paper-dim)', margin: '4px 0 0 0' }}>Community engagement rankings</p>
           </div>
           <div style={{ padding: '0', flex: 1 }}>
-            {initialLeaderboard.map((donor: any, i: number) => (
+            {initialLeaderboard.length === 0 && (
+              <div style={{ color: 'var(--paper-dim)', fontSize: '13px', textAlign: 'center', padding: '24px' }}>
+                No confirmed cash donations yet.
+              </div>
+            )}
+            {initialLeaderboard.map((donor, i) => (
               <div key={donor.rank} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', borderBottom: i < initialLeaderboard.length - 1 ? '1px solid var(--line)' : 'none', background: i === 0 ? 'rgba(199, 217, 77, 0.05)' : 'transparent' }}>
                 <div style={{ 
                   width: '28px', height: '28px', borderRadius: '50%', 

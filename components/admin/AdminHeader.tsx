@@ -52,21 +52,6 @@ export function AdminHeader({ title, adminName, adminInitials }: { title: string
         {/* Notifications */}
         <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative', color: 'var(--paper)' }}>
           <Bell size={20} />
-          <span style={{ 
-            position: 'absolute', 
-            top: -4, 
-            right: -4, 
-            background: 'var(--jeepney)', 
-            color: 'white', 
-            fontSize: '10px', 
-            fontWeight: 'bold', 
-            width: 16, 
-            height: 16, 
-            borderRadius: '50%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center'
-          }}>3</span>
         </button>
 
         {/* Profile Circle */}

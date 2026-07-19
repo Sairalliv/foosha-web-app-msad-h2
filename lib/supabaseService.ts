@@ -78,9 +78,35 @@ export interface EligibilityReviewItem {
 
 export interface LeaderboardEntry {
   rank: number
+  donorId: string
   name: string
   amount: string
   badges: string[]
+}
+
+export interface OverviewStats {
+  activeRequests: number
+  activeByTier: { elderly: number; pwd: number; infant: number; general: number }
+  foodDonationsCount: number
+  cashTotal: number
+  // % of all matches ever created that have reached 'confirmed' (picked up).
+  deliveredPercent: number
+}
+
+export interface AnalyticsSummary {
+  // Distinct households with at least one confirmed (fulfilled) request.
+  householdsHelped: number
+  // Total cash from donations that were actually given (status = 'Given').
+  valueDistributedPhp: number
+  // Average time between a request being filed and it getting matched, in hours.
+  // null when there isn't at least one match to measure yet.
+  avgTimeToMatchHours: number | null
+  // % of all matches that reached 'confirmed'.
+  confirmedMatchRatePercent: number
+  // Share of donations by type, as a percent of total donation count.
+  donationSplit: { foodPercent: number; cashPercent: number }
+  // Confirmed-match counts grouped by the recipient's barangay/address, top 5.
+  matchesByBarangay: { name: string; value: number }[]
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -112,11 +138,12 @@ function relativeTime(iso: string): string {
 
 function mapDonation(row: DbDonation, donorName?: string | null): Donation {
   const isCash = row.type === 'cash'
+  const foodItem = row.category ? `${row.category} — ${row.description || 'Food donation'}` : row.description || 'Food donation'
   return {
     id: row.id,
     donor: donorName || 'Unknown donor',
     type: row.type,
-    item: isCash ? `₱${row.amount ?? 0} Cash` : row.description || 'Food donation',
+    item: isCash ? `₱${row.amount ?? 0} Cash` : foodItem,
     amount: row.amount != null ? String(row.amount) : undefined,
     neighborhood: row.location || 'Unspecified',
     status: donationStatusToUi[row.status],
@@ -126,10 +153,11 @@ function mapDonation(row: DbDonation, donorName?: string | null): Donation {
 
 function mapRequest(row: DbHelpRequest, requestorName?: string | null): HelpRequest {
   const isCash = row.type === 'cash'
+  const foodNeed = row.category ? `${row.category} — ${row.description || 'Food assistance'}` : row.description || 'Food assistance'
   return {
     id: row.id,
     requestor: requestorName || 'Unknown household',
-    need: isCash ? 'Cash Assistance' : row.description || 'Food assistance',
+    need: isCash ? 'Cash Assistance' : foodNeed,
     priority: row.priority_tier,
     barangay: row.address,
     neighborhood: row.address,
@@ -189,7 +217,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
       .select(`
         id,
         status,
-        donations:donation_id ( type, description, amount, profiles:donor_id ( full_name ) ),
+        donations:donation_id ( type, category, description, amount, profiles:donor_id ( full_name ) ),
         requests:request_id ( priority_tier, profiles:recipient_id ( full_name ) )
       `)
       .order('created_at', { ascending: false })
@@ -200,12 +228,13 @@ export function createSupabaseService(supabase: SupabaseClient) {
       const donation = row.donations
       const request = row.requests
       const isCash = donation?.type === 'cash'
+      const foodItem = donation?.category ? `${donation.category} — ${donation?.description || 'Food donation'}` : donation?.description || 'Food donation'
       return {
         id: row.id,
         requestor: request?.profiles?.full_name || 'Unknown household',
         priority: request?.priority_tier || 'general',
         donor: donation?.profiles?.full_name || 'Unknown donor',
-        item: isCash ? `₱${donation?.amount ?? 0} Cash Assistance` : donation?.description || 'Food donation',
+        item: isCash ? `₱${donation?.amount ?? 0} Cash Assistance` : foodItem,
         kind: isCash ? 'cash' : 'food',
         status: row.status === 'confirmed' ? 'dispatched' : 'pending',
       }
@@ -219,7 +248,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
         id,
         verification_code,
         created_at,
-        donations:donation_id ( type, description, amount, profiles:donor_id ( full_name ) ),
+        donations:donation_id ( type, category, description, amount, profiles:donor_id ( full_name ) ),
         requests:request_id ( profiles:recipient_id ( full_name ) )
       `)
       .eq('status', 'pending')
@@ -230,11 +259,12 @@ export function createSupabaseService(supabase: SupabaseClient) {
     return (data ?? []).map((row: any) => {
       const donation = row.donations
       const isCash = donation?.type === 'cash'
+      const foodItem = donation?.category ? `${donation.category} — ${donation?.description || 'Food donation'}` : donation?.description || 'Food donation'
       return {
         id: row.id,
         donor: donation?.profiles?.full_name || 'Unknown donor',
         recipient: row.requests?.profiles?.full_name || 'Unknown household',
-        item: isCash ? `₱${donation?.amount ?? 0} Cash` : donation?.description || 'Food donation',
+        item: isCash ? `₱${donation?.amount ?? 0} Cash` : foodItem,
         code: row.verification_code,
         time: relativeTime(row.created_at),
       }
@@ -281,15 +311,128 @@ export function createSupabaseService(supabase: SupabaseClient) {
       totals.set(key, { name, total: (existing?.total ?? 0) + amount })
     }
 
-    return Array.from(totals.values())
-      .sort((a, b) => b.total - a.total)
+    return Array.from(totals.entries())
+      .sort((a, b) => b[1].total - a[1].total)
       .slice(0, 5)
-      .map((entry, i) => ({
+      .map(([donorId, entry], i) => ({
         rank: i + 1,
+        donorId,
         name: entry.name,
         amount: `₱${entry.total.toLocaleString()}`,
         badges: i === 0 ? ['bayani'] : [],
       }))
+  },
+
+  // Aggregate figures for the admin Overview page's stat cards. Computed
+  // directly from `donations` / `requests` / `matches` rather than kept as
+  // separate counters, so they can never drift from the underlying rows.
+  async getOverviewStats(): Promise<OverviewStats> {
+    const [requestsRes, donationsRes, matchesRes] = await Promise.all([
+      supabase.from('requests').select('status, priority_tier'),
+      supabase.from('donations').select('type, amount'),
+      supabase.from('matches').select('status'),
+    ])
+
+    if (requestsRes.error) throw requestsRes.error
+    if (donationsRes.error) throw donationsRes.error
+    if (matchesRes.error) throw matchesRes.error
+
+    const activeByTier = { elderly: 0, pwd: 0, infant: 0, general: 0 }
+    let activeRequests = 0
+    for (const row of (requestsRes.data ?? []) as any[]) {
+      if (row.status === 'confirmed') continue
+      activeRequests += 1
+      const tier = row.priority_tier as keyof typeof activeByTier
+      if (tier in activeByTier) activeByTier[tier] += 1
+    }
+
+    let foodDonationsCount = 0
+    let cashTotal = 0
+    for (const row of (donationsRes.data ?? []) as any[]) {
+      if (row.type === 'food') foodDonationsCount += 1
+      else cashTotal += Number(row.amount ?? 0)
+    }
+
+    const matches = (matchesRes.data ?? []) as any[]
+    const confirmedMatches = matches.filter((m) => m.status === 'confirmed').length
+    const deliveredPercent = matches.length === 0 ? 0 : Math.round((confirmedMatches / matches.length) * 100)
+
+    return { activeRequests, activeByTier, foodDonationsCount, cashTotal, deliveredPercent }
+  },
+
+  // Platform-wide figures for the admin Analytics page.
+  async getAnalytics(): Promise<AnalyticsSummary> {
+    const [requestsRes, donationsRes, matchesRes] = await Promise.all([
+      supabase.from('requests').select('recipient_id, status'),
+      supabase.from('donations').select('type, amount, status'),
+      supabase
+        .from('matches')
+        .select('status, created_at, requests:request_id ( created_at, address )'),
+    ])
+
+    if (requestsRes.error) throw requestsRes.error
+    if (donationsRes.error) throw donationsRes.error
+    if (matchesRes.error) throw matchesRes.error
+
+    const householdsHelped = new Set(
+      (requestsRes.data ?? [])
+        .filter((r: any) => r.status === 'confirmed')
+        .map((r: any) => r.recipient_id)
+    ).size
+
+    let valueDistributedPhp = 0
+    let foodCount = 0
+    let cashCount = 0
+    for (const row of (donationsRes.data ?? []) as any[]) {
+      if (row.type === 'food') foodCount += 1
+      else cashCount += 1
+      if (row.status === 'Given' && row.type === 'cash') {
+        valueDistributedPhp += Number(row.amount ?? 0)
+      }
+    }
+    const totalDonations = foodCount + cashCount
+    const donationSplit =
+      totalDonations === 0
+        ? { foodPercent: 0, cashPercent: 0 }
+        : {
+            foodPercent: Math.round((foodCount / totalDonations) * 100),
+            cashPercent: Math.round((cashCount / totalDonations) * 100),
+          }
+
+    const matches = (matchesRes.data ?? []) as any[]
+    const confirmedMatchRatePercent =
+      matches.length === 0 ? 0 : Math.round((matches.filter((m) => m.status === 'confirmed').length / matches.length) * 100)
+
+    const matchDurationsHours: number[] = []
+    const barangayCounts = new Map<string, number>()
+    for (const m of matches) {
+      const requestRow = m.requests
+      if (requestRow?.created_at && m.created_at) {
+        const hours = (new Date(m.created_at).getTime() - new Date(requestRow.created_at).getTime()) / 3_600_000
+        if (Number.isFinite(hours) && hours >= 0) matchDurationsHours.push(hours)
+      }
+      if (m.status === 'confirmed' && requestRow?.address) {
+        barangayCounts.set(requestRow.address, (barangayCounts.get(requestRow.address) ?? 0) + 1)
+      }
+    }
+    const avgTimeToMatchHours =
+      matchDurationsHours.length === 0
+        ? null
+        : Math.round((matchDurationsHours.reduce((sum, h) => sum + h, 0) / matchDurationsHours.length) * 10) / 10
+
+    const matchesByBarangay = Array.from(barangayCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, value]) => ({ name, value }))
+
+    return {
+      householdsHelped,
+      valueDistributedPhp,
+      avgTimeToMatchHours,
+      confirmedMatchRatePercent,
+      donationSplit,
+      matchesByBarangay,
+    }
   },
 
   /* ── WRITE operations ─────────────────────────────────────────── */

@@ -20,7 +20,7 @@ export async function requireUser() {
 }
 
 /**
- * Ensures the user is authenticated and fetches their profile data from the public.users table.
+ * Ensures the user is authenticated and fetches their profile data from the public.profiles table.
  * Redirects to /login if not authenticated.
  */
 export async function requireUserProfile() {
@@ -28,7 +28,7 @@ export async function requireUserProfile() {
   const supabase = await createClient()
 
   const { data: profile, error } = await supabase
-    .from('users')
+    .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()

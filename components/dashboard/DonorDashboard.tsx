@@ -1,28 +1,20 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Package, Banknote, MapPin, Calendar, PlusCircle, Map } from 'lucide-react'
-import Link from 'next/link'
+import { Package, Banknote, MapPin, Calendar, PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getSupabaseService } from '@/lib/supabaseService.client'
 import { Modal } from '@/components/ui/Modal'
 import { DonationForm } from '@/components/forms/DonationForm'
+import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
 import type { Donation, Profile } from '@/lib/supabase/types'
-
-// Read-only mock top-donors list for the leaderboard preview.
-// Replace with a real query (e.g. a `leaderboard` view aggregating
-// confirmed donations by donor) once that data source exists.
-const MOCK_LEADERBOARD: { rank: number; name: string; points: number; you?: boolean }[] = [
-  { rank: 1, name: 'Maria Santos', points: 4200 },
-  { rank: 2, name: 'Jepoy Villaruel', points: 3850 },
-  { rank: 3, name: 'Cebu Pacific Crew Assoc.', points: 3400 },
-  { rank: 4, name: 'You', points: 2960, you: true },
-  { rank: 5, name: 'Grace Lim', points: 2500 },
-]
+import type { LeaderboardEntry } from '@/lib/supabaseService'
 
 export function DonorDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [donations, setDonations] = useState<Donation[]>([])
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -49,9 +41,13 @@ export function DonorDashboard() {
     // RLS on `donations` should already scope rows to the current donor,
     // but we filter by donor_id explicitly so the query is correct even
     // if RLS isn't enabled yet.
-    const [profileResult, donationsResult] = await Promise.all([
+    const [profileResult, donationsResult, leaderboardResult] = await Promise.all([
       supabase.from('profiles').select('id, full_name, barangay, avatar_url, role').eq('id', user.id).single(),
       supabase.from('donations').select('*').eq('donor_id', user.id).order('created_at', { ascending: false }),
+      getSupabaseService().getLeaderboard().catch((err) => {
+        console.error('Failed to load leaderboard:', err)
+        return [] as LeaderboardEntry[]
+      }),
     ])
 
     if (profileResult.error) console.error('Failed to load profile:', profileResult.error)
@@ -59,6 +55,7 @@ export function DonorDashboard() {
 
     setProfile(profileResult.data ?? null)
     setDonations(donationsResult.data ?? [])
+    setLeaderboard(leaderboardResult)
     setIsLoading(false)
   }, [])
 
@@ -102,7 +99,7 @@ export function DonorDashboard() {
   const totalGiven = givenDonations
     .filter((d) => d.type === 'cash')
     .reduce((sum, d) => sum + (d.amount ?? 0), 0)
-  const leaderboardRank = MOCK_LEADERBOARD.find((entry) => entry.you)?.rank ?? MOCK_LEADERBOARD.length
+  const myLeaderboardEntry = leaderboard.find((entry) => entry.donorId === userId)
 
   return (
     <>
@@ -114,7 +111,7 @@ export function DonorDashboard() {
           <h1 className="text-4xl font-display mb-2">Welcome back, {displayName.split(' ')[0]}</h1>
           <p className="sub text-paper-dim">
             {profile?.barangay ? `Brgy. ${profile.barangay} · ` : ''}
-            Thank you for helping make Mandaue City a better place.
+            Thank you for helping make Cebu City a better place.
           </p>
         </div>
         <div className="welcome-avatar relative z-10 border-2 border-primary">{initials || 'D'}</div>
@@ -131,7 +128,7 @@ export function DonorDashboard() {
           <div className="lbl">Matches Confirmed</div>
         </div>
         <div className="stat-card">
-          <div className="num">#{leaderboardRank}</div>
+          <div className="num">{myLeaderboardEntry ? `#${myLeaderboardEntry.rank}` : '—'}</div>
           <div className="lbl">City Leaderboard Rank</div>
         </div>
       </div>
@@ -172,6 +169,14 @@ export function DonorDashboard() {
                     {d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()}` : d.description}
                   </div>
                   <div className="meta" style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
+                    {d.type === 'food' && (d.category || d.amount != null) && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Tag size={12} />
+                        {d.category}
+                        {d.category && d.amount != null ? ' · ' : ''}
+                        {d.amount != null ? `Qty ${d.amount}` : ''}
+                      </span>
+                    )}
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <MapPin size={12} /> {d.location}
                     </span>
@@ -186,6 +191,12 @@ export function DonorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Donation map */}
+      <NearbyMapPanel
+        title="Donation Map"
+        subtitle="See where donation centers, pantries, and NGOs across Cebu are located."
+      />
 
       {/* History + Leaderboard */}
       <div className="grid-2" style={{ marginTop: '32px' }}>
@@ -214,7 +225,22 @@ export function DonorDashboard() {
                           {d.type === 'food' ? <Package size={11} /> : <Banknote size={11} />} {d.type}
                         </span>
                       </td>
-                      <td>{d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()}` : d.description}</td>
+                      <td>
+                        {d.type === 'cash' ? (
+                          `₱${(d.amount ?? 0).toLocaleString()}`
+                        ) : (
+                          <div>
+                            <div>{d.description}</div>
+                            {(d.category || d.amount != null) && (
+                              <div className="meta" style={{ marginTop: '2px' }}>
+                                {d.category}
+                                {d.category && d.amount != null ? ' · ' : ''}
+                                {d.amount != null ? `Qty ${d.amount}` : ''}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </td>
                       <td className="id-cell">{new Date(d.created_at).toLocaleDateString()}</td>
                       <td>
                         <span className={`status-chip ${d.status === 'Given' ? 'confirmed' : 'awaiting_pickup'}`}>{d.status}</span>
@@ -230,15 +256,21 @@ export function DonorDashboard() {
         <div>
           <h3 style={{ marginBottom: '16px' }}>City Leaderboard</h3>
           <div className="panel">
-            <div className="leader-list" style={{ marginTop: 0 }}>
-              {MOCK_LEADERBOARD.map((entry) => (
-                <div key={entry.rank} className={`lrow ${entry.you ? 'you' : ''}`}>
-                  <div className="rk">{entry.rank}</div>
-                  <div className="nm">{entry.name}</div>
-                  <div className="pt">{entry.points.toLocaleString()} pts</div>
-                </div>
-              ))}
-            </div>
+            {leaderboard.length === 0 ? (
+              <p className="sub" style={{ margin: 0 }}>
+                No confirmed cash donations yet — be the first on the board!
+              </p>
+            ) : (
+              <div className="leader-list" style={{ marginTop: 0 }}>
+                {leaderboard.map((entry) => (
+                  <div key={entry.rank} className={`lrow ${entry.donorId === userId ? 'you' : ''}`}>
+                    <div className="rk">{entry.rank}</div>
+                    <div className="nm">{entry.donorId === userId ? 'You' : entry.name}</div>
+                    <div className="pt">{entry.amount}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

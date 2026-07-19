@@ -20,10 +20,8 @@ export function RecordsTableClient({ title, type, initialData }: { title: string
 
   const filteredData = initialData.filter(item => {
     if (filter !== 'All') {
-      // Map generic filters to specific data statuses.
-      // In the mock, statuses might be "Available", "Pending", "Matched", etc.
-      // We will do a simple text match for the sake of the mock demo,
-      // but in reality we'd map "Unmatched" -> "Available"/"Pending", "Confirmed" -> "Matched", etc.
+      // Map the generic filter labels to the actual UI-facing status strings
+      // produced by lib/supabaseService.ts (mapDonation/mapRequest).
       const s = item.status.toLowerCase()
       const f = filter.toLowerCase()
       if (f === 'unmatched' && !(s === 'available' || s === 'pending')) return false
