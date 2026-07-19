@@ -46,11 +46,15 @@ export function RegisterForm() {
     setIsGoogleLoading(true)
     const supabase = createClient()
 
+    // `role` needs to travel through the OAuth round trip so our callback
+    // route can save it — options.queryParams only gets sent to Google's
+    // authorization request and never comes back to us. Putting it on the
+    // redirectTo URL works because Supabase preserves that URL (including
+    // its query string) and calls it again after the provider redirects back.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: { role },
+        redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
       },
     })
 

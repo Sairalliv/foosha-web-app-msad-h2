@@ -10,9 +10,26 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code)
+
     if (!error) {
+      // Google sign-ins don't go through registerAction, so the role picked
+      // on the register page is threaded through as a query param on the
+      // redirect URL instead (see RegisterForm.tsx). Only ever applies it on
+      // the user's own row and only to a known role value.
+      const role = searchParams.get('role')
+      const validRoles = ['donor', 'recipient', 'admin']
+      if (role && validRoles.includes(role) && data.user) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ role })
+          .eq('id', data.user.id)
+
+        if (updateError) {
+          console.error('Failed to save role after Google sign-in:', updateError.message)
+        }
+      }
+
       // Create redirect URL safely
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
