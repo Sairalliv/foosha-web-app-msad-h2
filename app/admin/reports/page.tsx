@@ -1,12 +1,12 @@
 import { getSupabaseService } from '@/lib/supabaseService.server'
-import { MatchingQueueClient } from '@/components/admin/MatchingQueueClient'
+import { ReportsClient } from '@/components/admin/ReportsClient'
 import type { Donation, HelpRequest } from '@/lib/supabaseService'
 
 export const metadata = {
-  title: 'Matching Queue - Foosha Admin',
+  title: 'Reports & Export - Foosha Admin',
 }
 
-export default async function MatchingQueuePage() {
+export default async function ReportsPage() {
   const supabaseService = await getSupabaseService()
   const [donations, requests] = await Promise.all([
     supabaseService.getDonations().catch((err) => {
@@ -19,14 +19,5 @@ export default async function MatchingQueuePage() {
     }),
   ])
 
-  // Filter for pending ones only for the matching queue
-  const pendingDonations = donations.filter((d) => d.status === 'Available')
-  const pendingRequests = requests.filter((r) => r.status === 'Pending')
-
-  return (
-    <MatchingQueueClient
-      initialDonations={pendingDonations}
-      initialRequests={pendingRequests}
-    />
-  )
+  return <ReportsClient initialDonations={donations} initialRequests={requests} />
 }

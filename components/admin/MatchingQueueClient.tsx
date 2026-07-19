@@ -1,25 +1,27 @@
 'use client'
 
 import React, { useState } from 'react'
-import { supabaseService } from '@/lib/supabaseService'
+import { useRouter } from 'next/navigation'
+import { getSupabaseService } from '@/lib/supabaseService.client'
+import type { Donation, HelpRequest } from '@/lib/supabaseService'
 
-type Donation = any
-type Request = any
-
-export function MatchingQueueClient({ initialDonations, initialRequests }: { initialDonations: Donation[], initialRequests: Request[] }) {
+export function MatchingQueueClient({ initialDonations, initialRequests }: { initialDonations: Donation[], initialRequests: HelpRequest[] }) {
+  const router = useRouter()
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null)
-  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
+  const [selectedRequest, setSelectedRequest] = useState<HelpRequest | null>(null)
   const [isMatching, setIsMatching] = useState(false)
 
   const handleMatch = async () => {
     if (!selectedDonation || !selectedRequest) return
     setIsMatching(true)
     try {
+      const supabaseService = getSupabaseService()
       await supabaseService.createMatch(selectedDonation.id, selectedRequest.id)
-      alert('Match confirmed successfully!')
       setSelectedDonation(null)
       setSelectedRequest(null)
-      // In a real app, you would refresh the data here.
+      // Re-fetch the server component's data so the matched pair drops out
+      // of the "Available"/"Pending" lists instead of lingering stale.
+      router.refresh()
     } catch (e) {
       console.error(e)
       alert('Failed to confirm match')

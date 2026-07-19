@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { DonorDashboard } from '@/components/dashboard/DonorDashboard'
 import { RecipientDashboard } from '@/components/dashboard/RecipientDashboard'
-import { DemoRoleSwitcher } from '@/components/dashboard/DemoRoleSwitcher'
 
 export const metadata = {
   title: 'Dashboard - Foosha',
@@ -31,7 +30,6 @@ export default async function DashboardPage({
 
   return (
     <div className="app">
-      <DemoRoleSwitcher />
       <aside className="sidebar">
         <Image
           className="logo-mark"
@@ -67,8 +65,8 @@ export default async function DashboardPage({
       </aside>
 
       <main>
-        {effectiveRole === 'donor' && <DonorDashboard displayName={displayName} initials={initials} />}
-        {effectiveRole === 'recipient' && <RecipientDashboard displayName={displayName} initials={initials} />}
+        {effectiveRole === 'donor' && <DonorDashboard />}
+        {effectiveRole === 'recipient' && <RecipientDashboard />}
         {effectiveRole === 'admin' && (
           <div>
             <div className="welcome-card mb-8">

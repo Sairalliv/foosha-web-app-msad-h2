@@ -1,112 +1,186 @@
 'use client'
 
-import React, { useActionState, useState } from 'react'
-import { createDonationAction } from '@/actions/dashboard-actions'
+import React, { useState } from 'react'
+import { Package, Banknote, MapPin } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import type { Donation, DonationType } from '@/lib/supabase/types'
 
-const initialState = {
-  error: '',
-  success: false,
-  message: '',
+interface DonationFormProps {
+  /** auth.users.id of the signed-in donor, used to scope the insert */
+  donorId: string
+  onCancel: () => void
+  /** Called with the newly-inserted row so the parent can update local state */
+  onCreated: (donation: Donation) => void
 }
 
-export function DonationForm({ onCancel }: { onCancel: () => void }) {
-  const [state, formAction, isPending] = useActionState(
-    async (prevState: any, formData: FormData) => {
-      const res = await createDonationAction(formData)
-      if (res?.error) {
-        return { error: res.error, success: false, message: '' }
-      }
-      return { success: true, message: res.message || '', error: '' }
-    },
-    initialState
-  )
+export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps) {
+  const [type, setType] = useState<DonationType>('food')
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [location, setLocation] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
-  if (state.success) {
-    return (
-      <div className="p-6 text-center">
-        <h3 className="text-xl font-semibold text-primary mb-2">Success!</h3>
-        <p className="mb-6">{state.message}</p>
-        <button className="btn" style={{ background: 'var(--primary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }} onClick={onCancel}>
-          Return to Dashboard
-        </button>
-      </div>
-    )
+  const isValid =
+    location.trim().length > 0 &&
+    (type === 'food' ? description.trim().length > 0 : Number(amount) > 0)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!isValid || isSubmitting) return
+
+    setIsSubmitting(true)
+    setError('')
+
+    const supabase = createClient()
+
+    // Re-confirm the active session so donor_id matches auth.uid() for RLS,
+    // rather than trusting the donorId prop alone.
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user || user.id !== donorId) {
+      setError('Your session has expired. Please log in again.')
+      setIsSubmitting(false)
+      return
+    }
+
+    const { data, error: insertError } = await supabase
+      .from('donations')
+      .insert({
+        donor_id: user.id,
+        type,
+        description: type === 'food' ? description.trim() : null,
+        amount: type === 'cash' ? Number(amount) : null,
+        location: location.trim(),
+        status: 'Waiting', // all new submissions start out unconfirmed
+      })
+      .select()
+      .single()
+
+    setIsSubmitting(false)
+
+    if (insertError || !data) {
+      console.error(insertError)
+      setError('Something went wrong while submitting your donation. Please try again.')
+      return
+    }
+
+    onCreated(data as Donation)
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>Make a Donation</h2>
-      <p className="mb-6 opacity-80">Your contribution helps us provide essential support to the community.</p>
-
-      {state.error && <div className="p-3 bg-red-100 text-red-700 rounded mb-4 text-sm">{state.error}</div>}
-
-      <form action={formAction} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="type" className="text-sm font-medium">Donation Type *</label>
-          <select id="type" name="type" required className="p-2 border rounded" style={{ borderColor: 'rgba(0,0,0,0.2)', background: 'transparent', color: 'inherit' }}>
-            <option value="">Select type...</option>
-            <option value="food">Food Supplies</option>
-            <option value="cash">Financial Contribution</option>
-            <option value="supplies">Other Supplies (Medical, Clothing)</option>
-          </select>
+    <div>
+      <div className="modal-header jeepney-theme">
+        <div className="icon-badge">
+          <Package size={20} />
         </div>
+        <div className="eyebrow">Foosha · Give</div>
+        <h2>Make a Donation</h2>
+        <p className="sub">Your contribution goes straight to a family in Cebu City.</p>
+      </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="amount" className="text-sm font-medium">Amount or Quantity *</label>
-          <input 
-            type="text" 
-            id="amount" 
-            name="amount" 
-            required 
-            placeholder="e.g. 50 packs of rice, or 1000 PHP" 
-            className="p-2 border rounded" 
-            style={{ borderColor: 'rgba(0,0,0,0.2)', background: 'transparent', color: 'inherit' }}
-          />
-        </div>
+      <div className="modal-body">
+        {error && <div className="auth-error">{error}</div>}
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="pickup" className="text-sm font-medium">Pickup/Delivery Address (Optional)</label>
-          <input 
-            type="text" 
-            id="pickup" 
-            name="pickup" 
-            placeholder="Where should we pick this up?" 
-            className="p-2 border rounded" 
-            style={{ borderColor: 'rgba(0,0,0,0.2)', background: 'transparent', color: 'inherit' }}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          {/* Type toggle */}
+          <div className="type-toggle" style={{ marginBottom: '20px', maxWidth: 'none' }}>
+            <button
+              type="button"
+              onClick={() => setType('food')}
+              className={type === 'food' ? 'active' : ''}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              <Package size={16} /> Food
+            </button>
+            <button
+              type="button"
+              onClick={() => setType('cash')}
+              className={type === 'cash' ? 'active' : ''}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              <Banknote size={16} /> Cash
+            </button>
+          </div>
+          <p className="type-toggle-caption">
+            {type === 'food'
+              ? 'Non-perishable items work best — they stay safe until pickup is confirmed.'
+              : 'Cash donations are pooled and released once a match is confirmed.'}
+          </p>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="notes" className="text-sm font-medium">Additional Notes</label>
-          <textarea 
-            id="notes" 
-            name="notes" 
-            rows={3} 
-            placeholder="Any other details..." 
-            className="p-2 border rounded"
-            style={{ borderColor: 'rgba(0,0,0,0.2)', background: 'transparent', color: 'inherit' }}
-          />
-        </div>
+          {type === 'food' ? (
+            <div className="field">
+              <label htmlFor="description">Item Details *</label>
+              <textarea
+                id="description"
+                rows={3}
+                required
+                placeholder="e.g. rice, canned goods, instant noodles"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+          ) : (
+            <div className="field">
+              <label htmlFor="amount">Amount (₱) *</label>
+              <div style={{ position: 'relative' }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    left: '14px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--paper-dim)',
+                    fontWeight: 600,
+                    fontSize: '14.5px',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  ₱
+                </span>
+                <input
+                  id="amount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  required
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  style={{ paddingLeft: '30px' }}
+                />
+              </div>
+            </div>
+          )}
 
-        <div className="flex justify-end gap-3 mt-4">
-          <button 
-            type="button" 
-            onClick={onCancel} 
-            className="btn btn-ghost" 
-            style={{ padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', border: '1px solid rgba(0,0,0,0.2)' }}
-          >
-            Cancel
-          </button>
-          <button 
-            type="submit" 
-            disabled={isPending}
-            className="btn"
-            style={{ background: 'var(--primary)', color: 'white', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', opacity: isPending ? 0.7 : 1 }}
-          >
-            {isPending ? 'Submitting...' : 'Confirm Donation'}
-          </button>
-        </div>
-      </form>
+          <div className="field">
+            <label htmlFor="location">Barangay / Location *</label>
+            <div className="input-icon-wrap">
+              <MapPin size={16} />
+              <input
+                id="location"
+                type="text"
+                required
+                placeholder="e.g. Barangay Basak, Cebu City"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={isSubmitting}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={!isValid || isSubmitting}>
+              {isSubmitting ? 'Submitting…' : 'Confirm Donation'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
