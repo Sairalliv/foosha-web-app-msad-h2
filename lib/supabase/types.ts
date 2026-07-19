@@ -28,14 +28,15 @@ export interface Donation {
   id: string
   donor_id: string // FK -> profiles.id / auth.users.id
   type: DonationType
+  category: string | null // food category, e.g. "Rice & Grains"; used when type === 'food'
   description: string | null // used when type === 'food'
-  amount: number | null // used when type === 'cash', in PHP
+  amount: number | null // quantity for food, PHP value for cash
   location: string | null // barangay / drop-off location
   status: DonationStatus
   created_at: string
 }
 
-export type DonationInsert = Pick<Donation, 'donor_id' | 'type' | 'description' | 'amount' | 'location'> & {
+export type DonationInsert = Pick<Donation, 'donor_id' | 'type' | 'category' | 'description' | 'amount' | 'location'> & {
   status?: DonationStatus
 }
 

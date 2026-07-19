@@ -138,11 +138,12 @@ function relativeTime(iso: string): string {
 
 function mapDonation(row: DbDonation, donorName?: string | null): Donation {
   const isCash = row.type === 'cash'
+  const foodItem = row.category ? `${row.category} — ${row.description || 'Food donation'}` : row.description || 'Food donation'
   return {
     id: row.id,
     donor: donorName || 'Unknown donor',
     type: row.type,
-    item: isCash ? `₱${row.amount ?? 0} Cash` : row.description || 'Food donation',
+    item: isCash ? `₱${row.amount ?? 0} Cash` : foodItem,
     amount: row.amount != null ? String(row.amount) : undefined,
     neighborhood: row.location || 'Unspecified',
     status: donationStatusToUi[row.status],
@@ -215,7 +216,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
       .select(`
         id,
         status,
-        donations:donation_id ( type, description, amount, profiles:donor_id ( full_name ) ),
+        donations:donation_id ( type, category, description, amount, profiles:donor_id ( full_name ) ),
         requests:request_id ( priority_tier, profiles:recipient_id ( full_name ) )
       `)
       .order('created_at', { ascending: false })
@@ -226,12 +227,13 @@ export function createSupabaseService(supabase: SupabaseClient) {
       const donation = row.donations
       const request = row.requests
       const isCash = donation?.type === 'cash'
+      const foodItem = donation?.category ? `${donation.category} — ${donation?.description || 'Food donation'}` : donation?.description || 'Food donation'
       return {
         id: row.id,
         requestor: request?.profiles?.full_name || 'Unknown household',
         priority: request?.priority_tier || 'general',
         donor: donation?.profiles?.full_name || 'Unknown donor',
-        item: isCash ? `₱${donation?.amount ?? 0} Cash Assistance` : donation?.description || 'Food donation',
+        item: isCash ? `₱${donation?.amount ?? 0} Cash Assistance` : foodItem,
         kind: isCash ? 'cash' : 'food',
         status: row.status === 'confirmed' ? 'dispatched' : 'pending',
       }
@@ -245,7 +247,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
         id,
         verification_code,
         created_at,
-        donations:donation_id ( type, description, amount, profiles:donor_id ( full_name ) ),
+        donations:donation_id ( type, category, description, amount, profiles:donor_id ( full_name ) ),
         requests:request_id ( profiles:recipient_id ( full_name ) )
       `)
       .eq('status', 'pending')
@@ -256,11 +258,12 @@ export function createSupabaseService(supabase: SupabaseClient) {
     return (data ?? []).map((row: any) => {
       const donation = row.donations
       const isCash = donation?.type === 'cash'
+      const foodItem = donation?.category ? `${donation.category} — ${donation?.description || 'Food donation'}` : donation?.description || 'Food donation'
       return {
         id: row.id,
         donor: donation?.profiles?.full_name || 'Unknown donor',
         recipient: row.requests?.profiles?.full_name || 'Unknown household',
-        item: isCash ? `₱${donation?.amount ?? 0} Cash` : donation?.description || 'Food donation',
+        item: isCash ? `₱${donation?.amount ?? 0} Cash` : foodItem,
         code: row.verification_code,
         time: relativeTime(row.created_at),
       }

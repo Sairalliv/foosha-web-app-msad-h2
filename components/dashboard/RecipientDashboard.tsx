@@ -283,7 +283,17 @@ export function RecipientDashboard() {
                   <div className="listing-top">
                     <div>
                       <div className="name">{d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()} cash pledge` : d.description}</div>
-                      <div className="from">{d.location}</div>
+                      <div className="from">
+                        {d.location}
+                        {d.type === 'food' && (d.category || d.amount != null) && (
+                          <>
+                            {' · '}
+                            {d.category}
+                            {d.category && d.amount != null ? ' · ' : ''}
+                            {d.amount != null ? `Qty ${d.amount}` : ''}
+                          </>
+                        )}
+                      </div>
                     </div>
                     <span className={`kind-badge ${d.type}`}>{d.type}</span>
                   </div>
