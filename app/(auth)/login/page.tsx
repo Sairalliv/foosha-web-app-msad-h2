@@ -8,11 +8,7 @@ export const metadata = {
   description: 'Select your role and sign in to Foosha',
 }
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
+export default async function LoginPage() {
   const user = await getUserOrNull()
   
   if (user) {

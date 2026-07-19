@@ -32,11 +32,8 @@ interface DonationMapProps {
   locations: DonationLocation[]
   selectedCategory: string | null
   searchQuery: string
-<<<<<<< HEAD
   isFullScreen?: boolean
   initialCenter?: [number, number]
-  initialZoom?: number
-=======
   /** CSS height for the map container. Defaults to the full-page map height. */
   height?: string
   /** Initial/default zoom level used when there's no single-result focus. */
@@ -45,7 +42,6 @@ interface DonationMapProps {
    *  off when the map is embedded inside a scrollable dashboard panel so it
    *  doesn't hijack page scrolling. */
   scrollWheelZoom?: boolean
->>>>>>> 58b60bcf28183bcc8f8db61c5c649163b76ec767
 }
 
 // Component to dynamically update map center
@@ -55,29 +51,27 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
   return null
 }
 
-<<<<<<< HEAD
-export default function DonationMap({ locations, selectedCategory, searchQuery, isFullScreen = false, initialCenter, initialZoom }: DonationMapProps) {
-=======
-export default function DonationMap({
-  locations,
-  selectedCategory,
-  searchQuery,
-  height = 'calc(100vh - 64px)',
+export default function DonationMap({ 
+  locations, 
+  selectedCategory, 
+  searchQuery, 
+  isFullScreen = false, 
+  initialCenter, 
+  height,
   defaultZoom = 11,
-  scrollWheelZoom = true,
+  scrollWheelZoom = true
 }: DonationMapProps) {
->>>>>>> 58b60bcf28183bcc8f8db61c5c649163b76ec767
   const [mounted, setMounted] = useState(false)
   const defaultCenter: [number, number] = initialCenter ?? [10.3157, 123.8854] // Cebu City
-  const defaultZoom = initialZoom ?? 11
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 
   if (!mounted) {
     return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center animate-pulse" style={{ height }}>
+      <div className={`w-full h-full bg-gray-100 flex items-center justify-center animate-pulse ${isFullScreen ? 'h-screen' : ''}`} style={!isFullScreen && height ? { height } : undefined}>
         <p className="text-gray-500 font-medium">Loading Map...</p>
       </div>
     )
@@ -101,11 +95,7 @@ export default function DonationMap({
     : defaultCenter
 
   return (
-<<<<<<< HEAD
-    <div className={`w-full relative z-0 ${isFullScreen ? 'h-screen' : 'h-[calc(100vh-64px)]'}`}>
-=======
-    <div className="w-full relative z-0" style={{ height }}>
->>>>>>> 58b60bcf28183bcc8f8db61c5c649163b76ec767
+    <div className={`w-full relative z-0 ${isFullScreen ? 'h-screen' : (height ? '' : 'h-[calc(100vh-64px)]')}`} style={!isFullScreen && height ? { height } : undefined}>
       <MapContainer 
         center={defaultCenter} 
         zoom={defaultZoom} 
@@ -143,7 +133,7 @@ export default function DonationMap({
 
                   <div className="space-y-2 mt-3">
                     {location.description && (
-                      <p className="text-sm text-gray-600 italic leading-snug m-0">"{location.description}"</p>
+                      <p className="text-sm text-gray-600 italic leading-snug m-0">&quot;{location.description}&quot;</p>
                     )}
                     
                     <div className="flex items-start gap-2">

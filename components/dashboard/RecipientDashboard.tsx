@@ -1,12 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-<<<<<<< HEAD
-import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck, Map } from 'lucide-react'
-import Link from 'next/link'
-=======
-import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck, Tag } from 'lucide-react'
->>>>>>> 58b60bcf28183bcc8f8db61c5c649163b76ec767
+import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { HelpRequestForm } from '@/components/forms/HelpRequestForm'
@@ -257,7 +252,7 @@ export function RecipientDashboard() {
                   <div className="meta" style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
                     {r.type === 'food' && (r.category || r.amount != null) && (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Tag size={12} />
+                        {/* Removed icon to match edit request */}
                         {r.category}
                         {r.category && r.amount != null ? ' · ' : ''}
                         {r.amount != null ? `Qty ${r.amount}` : ''}
@@ -296,17 +291,7 @@ export function RecipientDashboard() {
                   <div className="listing-top">
                     <div>
                       <div className="name">{d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()} cash pledge` : d.description}</div>
-                      <div className="from">
-                        {d.location}
-                        {d.type === 'food' && (d.category || d.amount != null) && (
-                          <>
-                            {' · '}
-                            {d.category}
-                            {d.category && d.amount != null ? ' · ' : ''}
-                            {d.amount != null ? `Qty ${d.amount}` : ''}
-                          </>
-                        )}
-                      </div>
+                      <div className="from">{d.location}</div>
                     </div>
                     <span className={`kind-badge ${d.type}`}>{d.type}</span>
                   </div>
@@ -320,36 +305,11 @@ export function RecipientDashboard() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Donation Map */}
-      <div style={{ marginTop: '32px' }}>
-        <h3 style={{ marginBottom: '16px' }}>Donation Map</h3>
-        <div className="map-preview-card">
-          <div className="map-preview-card-content">
-            <div className="map-preview-icon" style={{ background: 'rgba(232, 84, 47, 0.15)', color: 'var(--jeepney)' }}>
-              <Map size={28} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--paper)', marginBottom: '6px' }}>
-                Find Help Nearby
-              </h4>
-              <p className="sub" style={{ margin: 0, fontSize: '13px', color: 'var(--paper-dim)' }}>
-                Explore donation centers, community pantries, and NGOs near you on an interactive map of Cebu.
-              </p>
-            </div>
-          </div>
-          <Link href="/map" className="btn map-preview-btn" style={{ background: 'var(--jeepney)', color: 'white' }}>
-            <MapPin size={16} /> Open Full Map
-          </Link>
-        </div>
-      </div>
-=======
       {/* Donation map */}
       <NearbyMapPanel
         title="Find Help Nearby"
         subtitle="Donation centers, pantries, and NGOs across Cebu you can walk in to."
       />
->>>>>>> 58b60bcf28183bcc8f8db61c5c649163b76ec767
 
       {showForm && userId && (
         <Modal onClose={() => setShowForm(false)}>

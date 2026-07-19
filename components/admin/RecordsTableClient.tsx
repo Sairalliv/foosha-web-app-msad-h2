@@ -9,6 +9,7 @@ interface RecordItem {
   status: string
   neighborhood: string
   date: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
 

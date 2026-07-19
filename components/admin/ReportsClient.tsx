@@ -60,7 +60,9 @@ export function ReportsClient({
     return true
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const donations = useMemo(() => initialDonations.filter((d) => inRange(d.date)), [initialDonations, from, to])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const requests = useMemo(() => initialRequests.filter((r) => inRange(r.date)), [initialRequests, from, to])
 
   const cashTotal = donations

@@ -8,6 +8,7 @@ export function VerificationClient({
   initialFeed,
   initialEligibilityReview,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialFeed: any[]
   initialEligibilityReview: EligibilityReviewItem[]
 }) {
