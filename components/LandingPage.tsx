@@ -1,7 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getSupabaseService } from "@/lib/supabaseService.server";
+import type { LeaderboardEntry } from "@/lib/supabaseService";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabaseService = await getSupabaseService();
+  const leaderboard = await supabaseService.getLeaderboard().catch((err) => {
+    console.error("Failed to load public leaderboard:", err);
+    return [] as LeaderboardEntry[];
+  });
+
   return (
     <div>
       <header className="site">
@@ -158,7 +166,7 @@ export default function LandingPage() {
       <section id="leaderboard" className="landing wrap">
         <div className="section-head" style={{ marginBottom: 40, margin: "0 auto 48px", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>
-            Cebu City · Top donors this month
+            Cebu City · Top donors
           </div>
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
@@ -170,55 +178,30 @@ export default function LandingPage() {
             <div style={{ textAlign: "right" }}>Lifetime Given</div>
           </div>
 
-          <div className="lb-row top-rank">
-            <div className="rank-num">1</div>
-            <div>
-              <div className="name">Basak Sari-Sari Store</div>
-              <div className="badges">
-                <span className="badge-pill bayani">Bayani ng Barangay</span>
-                <span className="badge-pill first">First Harvest</span>
+          {leaderboard.length === 0 ? (
+            <p className="sub" style={{ textAlign: "center", padding: "24px 0" }}>
+              No confirmed cash donations yet — be the first name on this list.
+            </p>
+          ) : (
+            leaderboard.map((entry) => (
+              <div key={entry.rank} className={`lb-row ${entry.rank === 1 ? "top-rank" : ""}`}>
+                <div className="rank-num">{entry.rank}</div>
+                <div>
+                  <div className="name">{entry.name}</div>
+                  {entry.badges.length > 0 && (
+                    <div className="badges">
+                      {entry.badges.map((badge) => (
+                        <span key={badge} className={`badge-pill ${badge === "bayani" ? "bayani" : "first"}`}>
+                          {badge === "bayani" ? "Bayani ng Barangay" : "First Harvest"}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="amount">{entry.amount}</div>
               </div>
-            </div>
-            <div className="amount">₱18,400</div>
-          </div>
-
-          <div className="lb-row">
-            <div className="rank-num">2</div>
-            <div>
-              <div className="name">Dela Peña Family</div>
-              <div className="badges">
-                <span className="badge-pill first">First Harvest</span>
-              </div>
-            </div>
-            <div className="amount">₱11,050</div>
-          </div>
-
-          <div className="lb-row">
-            <div className="rank-num">3</div>
-            <div>
-              <div className="name">Tipolo Bakeshop</div>
-              <div className="badges">
-                <span className="badge-pill first">First Harvest</span>
-              </div>
-            </div>
-            <div className="amount">₱7,900</div>
-          </div>
-
-          <div className="lb-row">
-            <div className="rank-num">4</div>
-            <div>
-              <div className="name">Subangdaku Rotary Club</div>
-            </div>
-            <div className="amount">₱6,200</div>
-          </div>
-
-          <div className="lb-row">
-            <div className="rank-num">5</div>
-            <div>
-              <div className="name">M. Fernandez</div>
-            </div>
-            <div className="amount">₱4,850</div>
-          </div>
+            ))
+          )}
         </div>
       </section>
 
