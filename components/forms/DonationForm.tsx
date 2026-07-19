@@ -50,7 +50,8 @@ export function DonationForm({ donorId: _donorId, onCancel, onCreated }: Donatio
         type,
         category: type === 'food' ? category : null,
         description: type === 'food' ? description.trim() : null,
-        amount: Number(amount),
+        quantity: type === 'food' ? Number(amount) : null,
+        amount: type === 'cash' ? Number(amount) : null,
         location: location.trim(),
       })
 

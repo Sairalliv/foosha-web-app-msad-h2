@@ -52,7 +52,11 @@ export async function registerAction(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    console.error('Signup error:', error)
+    const errorMessage = typeof error.message === 'string' && error.message.length > 0 
+      ? error.message 
+      : JSON.stringify(error) !== '{}' ? JSON.stringify(error) : 'An unknown error occurred during sign up.'
+    return { error: errorMessage }
   }
 
   // Usually users need to confirm their email depending on Supabase settings.
