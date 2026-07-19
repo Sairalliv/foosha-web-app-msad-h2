@@ -6,6 +6,10 @@ export const AUTH_ROUTES = ['/login', '/register']
 export const PROTECTED_ROUTES = ['/dashboard', '/admin']
 export const ADMIN_ROUTES = ['/admin']
 
+// Routes that must never be blocked or redirected by the proxy.
+// /auth/callback handles the OAuth code exchange — intercepting it breaks Google Sign-In.
+export const PASSTHROUGH_ROUTES = ['/auth/callback', '/auth/']
+
 export function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.some((route) => pathname.startsWith(route))
 }

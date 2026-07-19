@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react'
 import { Package, Banknote, MapPin, Tag } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import type { Donation, DonationType } from '@/lib/supabase/types'
 import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
+import { createDonationAction } from '@/actions/donation-actions'
 
 interface DonationFormProps {
   /** auth.users.id of the signed-in donor, used to scope the insert */
@@ -14,7 +14,7 @@ interface DonationFormProps {
   onCreated: (donation: Donation) => void
 }
 
-export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps) {
+export function DonationForm({ donorId: _donorId, onCancel, onCreated }: DonationFormProps) {
   const [type, setType] = useState<DonationType>('food')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
@@ -45,44 +45,28 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
     setIsSubmitting(true)
     setError('')
 
-    const supabase = createClient()
-
-    // Re-confirm the active session so donor_id matches auth.uid() for RLS,
-    // rather than trusting the donorId prop alone.
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user || user.id !== donorId) {
-      setError('Your session has expired. Please log in again.')
-      setIsSubmitting(false)
-      return
-    }
-
-    const { data, error: insertError } = await supabase
-      .from('donations')
-      .insert({
-        donor_id: user.id,
+    try {
+      const response = await createDonationAction({
         type,
         category: type === 'food' ? category : null,
         description: type === 'food' ? description.trim() : null,
         amount: Number(amount),
         location: location.trim(),
-        status: 'Waiting', // all new submissions start out unconfirmed
       })
-      .select()
-      .single()
 
-    setIsSubmitting(false)
+      setIsSubmitting(false)
 
-    if (insertError || !data) {
-      console.error(insertError)
-      setError('Something went wrong while submitting your donation. Please try again.')
-      return
+      if (!response.success || !response.data) {
+        setError(response.error || 'Something went wrong while submitting your donation. Please try again.')
+        return
+      }
+
+      onCreated(response.data)
+    } catch (err) {
+      console.error(err)
+      setError('An unexpected error occurred. Please try again.')
+      setIsSubmitting(false)
     }
-
-    onCreated(data as Donation)
   }
 
   return (
