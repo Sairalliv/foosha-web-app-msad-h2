@@ -4,19 +4,7 @@ import React, { useState } from 'react'
 import { Package, Banknote, MapPin, Tag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Donation, DonationType } from '@/lib/supabase/types'
-
-const FOOD_CATEGORIES = [
-  'Rice & Grains',
-  'Canned Goods',
-  'Instant Noodles',
-  'Vegetables & Fruits',
-  'Bread & Bakery',
-  'Dairy & Eggs',
-  'Meat & Protein',
-  'Beverages',
-  'Baby Food',
-  'Other',
-]
+import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
 
 interface DonationFormProps {
   /** auth.users.id of the signed-in donor, used to scope the insert */

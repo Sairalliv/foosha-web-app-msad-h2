@@ -55,8 +55,9 @@ export interface HelpRequest {
   id: string
   recipient_id: string // FK -> profiles.id / auth.users.id
   type: RequestType
+  category: string | null // food category, e.g. "Rice & Grains"; used when type === 'food'
   description: string | null // used when type === 'food'
-  amount: number | null // used when type === 'cash', in PHP (optional)
+  amount: number | null // quantity for food, PHP value for cash (optional)
   priority_tier: PriorityTier
   address: string
   status: RequestStatus
@@ -68,7 +69,7 @@ export interface HelpRequest {
 
 export type HelpRequestInsert = Pick<
   HelpRequest,
-  'recipient_id' | 'type' | 'description' | 'amount' | 'priority_tier' | 'address'
+  'recipient_id' | 'type' | 'category' | 'description' | 'amount' | 'priority_tier' | 'address'
 > & {
   status?: RequestStatus
   verification_status?: VerificationStatus | null

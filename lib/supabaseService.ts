@@ -153,10 +153,11 @@ function mapDonation(row: DbDonation, donorName?: string | null): Donation {
 
 function mapRequest(row: DbHelpRequest, requestorName?: string | null): HelpRequest {
   const isCash = row.type === 'cash'
+  const foodNeed = row.category ? `${row.category} — ${row.description || 'Food assistance'}` : row.description || 'Food assistance'
   return {
     id: row.id,
     requestor: requestorName || 'Unknown household',
-    need: isCash ? 'Cash Assistance' : row.description || 'Food assistance',
+    need: isCash ? 'Cash Assistance' : foodNeed,
     priority: row.priority_tier,
     barangay: row.address,
     neighborhood: row.address,

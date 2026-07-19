@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck } from 'lucide-react'
+import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck, Tag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { HelpRequestForm } from '@/components/forms/HelpRequestForm'
@@ -250,6 +250,14 @@ export function RecipientDashboard() {
                     </span>
                   </div>
                   <div className="meta" style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
+                    {r.type === 'food' && (r.category || r.amount != null) && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Tag size={12} />
+                        {r.category}
+                        {r.category && r.amount != null ? ' · ' : ''}
+                        {r.amount != null ? `Qty ${r.amount}` : ''}
+                      </span>
+                    )}
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <MapPin size={12} /> {r.address}
                     </span>
