@@ -118,7 +118,7 @@ export function DonorDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="stat-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: '28px' }}>
+      <div className="stat-row" style={{ marginTop: '28px' }}>
         <div className="stat-card">
           <div className="num">₱{totalGiven.toLocaleString()}</div>
           <div className="lbl">Total Given</div>
