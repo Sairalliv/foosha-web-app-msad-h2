@@ -820,3 +820,131 @@ footer.site{border-top:1px solid var(--line); padding:40px 0; position:relative;
   0%, 100% { box-shadow: 0 0 0 0 rgba(199,217,77,0.4); }
   50%      { box-shadow: 0 0 8px 4px rgba(199,217,77,0.1); }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Full-Screen Donation Map
+   ══════════════════════════════════════════════════════════════ */
+
+.fullscreen-map-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Back to Dashboard — glassmorphic pill button */
+.back-to-dashboard-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 4px 16px -2px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.back-to-dashboard-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  color: #059669;
+}
+
+.back-to-dashboard-btn:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+.back-to-dashboard-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 8px -2px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 640px) {
+  .back-to-dashboard-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    top: 12px;
+    right: 12px;
+  }
+  .back-to-dashboard-btn span {
+    display: none;
+  }
+}
+
+/* Dashboard — Map preview CTA card */
+.map-preview-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.map-preview-card-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.map-preview-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--kalamansi);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-preview-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 24px !important;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.map-preview-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px -4px rgba(16, 185, 129, 0.4);
+}
+
+@media (max-width: 640px) {
+  .map-preview-card {
+    padding: 18px;
+  }
+  .map-preview-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+}

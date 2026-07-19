@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Package, Banknote, MapPin, Calendar, PlusCircle } from 'lucide-react'
+import { Package, Banknote, MapPin, Calendar, PlusCircle, Map } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { DonationForm } from '@/components/forms/DonationForm'
@@ -239,6 +240,29 @@ export function DonorDashboard() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Donation Map */}
+      <div style={{ marginTop: '32px' }}>
+        <h3 style={{ marginBottom: '16px' }}>Donation Map</h3>
+        <div className="map-preview-card">
+          <div className="map-preview-card-content">
+            <div className="map-preview-icon">
+              <Map size={28} />
+            </div>
+            <div>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--paper)', marginBottom: '6px' }}>
+                Explore Donation Centers
+              </h4>
+              <p className="sub" style={{ margin: 0, fontSize: '13px', color: 'var(--paper-dim)' }}>
+                View donation centers, NGOs, community pantries, and active drives across Cebu on an interactive map.
+              </p>
+            </div>
+          </div>
+          <Link href="/map" className="btn btn-primary map-preview-btn">
+            <MapPin size={16} /> Open Full Map
+          </Link>
         </div>
       </div>
 

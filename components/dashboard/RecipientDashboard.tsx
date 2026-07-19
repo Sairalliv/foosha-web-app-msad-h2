@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck } from 'lucide-react'
+import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck, Map } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { HelpRequestForm } from '@/components/forms/HelpRequestForm'
@@ -293,6 +294,29 @@ export function RecipientDashboard() {
               This list is informational only — matching to your requests is handled automatically by the system.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Donation Map */}
+      <div style={{ marginTop: '32px' }}>
+        <h3 style={{ marginBottom: '16px' }}>Donation Map</h3>
+        <div className="map-preview-card">
+          <div className="map-preview-card-content">
+            <div className="map-preview-icon" style={{ background: 'rgba(232, 84, 47, 0.15)', color: 'var(--jeepney)' }}>
+              <Map size={28} />
+            </div>
+            <div>
+              <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--paper)', marginBottom: '6px' }}>
+                Find Help Nearby
+              </h4>
+              <p className="sub" style={{ margin: 0, fontSize: '13px', color: 'var(--paper-dim)' }}>
+                Explore donation centers, community pantries, and NGOs near you on an interactive map of Cebu.
+              </p>
+            </div>
+          </div>
+          <Link href="/map" className="btn map-preview-btn" style={{ background: 'var(--jeepney)', color: 'white' }}>
+            <MapPin size={16} /> Open Full Map
+          </Link>
         </div>
       </div>
 

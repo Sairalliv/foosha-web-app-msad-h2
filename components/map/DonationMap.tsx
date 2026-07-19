@@ -32,6 +32,9 @@ interface DonationMapProps {
   locations: DonationLocation[]
   selectedCategory: string | null
   searchQuery: string
+  isFullScreen?: boolean
+  initialCenter?: [number, number]
+  initialZoom?: number
 }
 
 // Component to dynamically update map center
@@ -41,9 +44,10 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
   return null
 }
 
-export default function DonationMap({ locations, selectedCategory, searchQuery }: DonationMapProps) {
+export default function DonationMap({ locations, selectedCategory, searchQuery, isFullScreen = false, initialCenter, initialZoom }: DonationMapProps) {
   const [mounted, setMounted] = useState(false)
-  const defaultCenter: [number, number] = [10.3157, 123.8854] // Cebu City
+  const defaultCenter: [number, number] = initialCenter ?? [10.3157, 123.8854] // Cebu City
+  const defaultZoom = initialZoom ?? 11
 
   useEffect(() => {
     setMounted(true)
@@ -75,14 +79,14 @@ export default function DonationMap({ locations, selectedCategory, searchQuery }
     : defaultCenter
 
   return (
-    <div className="w-full h-[calc(100vh-64px)] relative z-0">
+    <div className={`w-full relative z-0 ${isFullScreen ? 'h-screen' : 'h-[calc(100vh-64px)]'}`}>
       <MapContainer 
         center={defaultCenter} 
-        zoom={11} 
+        zoom={defaultZoom} 
         style={{ width: '100%', height: '100%' }}
         zoomControl={false}
       >
-        <ChangeView center={mapCenter} zoom={filteredLocations.length === 1 ? 14 : 11} />
+        <ChangeView center={mapCenter} zoom={filteredLocations.length === 1 ? 14 : defaultZoom} />
         
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

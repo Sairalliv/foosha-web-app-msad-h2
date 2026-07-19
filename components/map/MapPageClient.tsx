@@ -9,7 +9,7 @@ import MapFilters from './MapFilters'
 const DonationMap = dynamic(() => import('./DonationMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[calc(100vh-64px)] bg-gray-50 flex items-center justify-center">
+    <div className="w-full h-screen bg-gray-50 flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="text-emerald-700 font-bold animate-pulse">Loading Interactive Map...</p>
@@ -20,9 +20,10 @@ const DonationMap = dynamic(() => import('./DonationMap'), {
 
 interface MapPageClientProps {
   initialLocations: DonationLocation[]
+  isFullScreen?: boolean
 }
 
-export default function MapPageClient({ initialLocations }: MapPageClientProps) {
+export default function MapPageClient({ initialLocations, isFullScreen = false }: MapPageClientProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -33,7 +34,7 @@ export default function MapPageClient({ initialLocations }: MapPageClientProps) 
   }, [initialLocations])
 
   return (
-    <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden">
+    <div className={`relative w-full overflow-hidden ${isFullScreen ? 'h-screen' : 'h-[calc(100vh-64px)]'}`}>
       <MapFilters 
         categories={categories}
         selectedCategory={selectedCategory}
@@ -45,7 +46,9 @@ export default function MapPageClient({ initialLocations }: MapPageClientProps) 
         locations={initialLocations} 
         selectedCategory={selectedCategory}
         searchQuery={searchQuery}
+        isFullScreen={isFullScreen}
       />
     </div>
   )
 }
+
