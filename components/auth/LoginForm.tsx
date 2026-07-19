@@ -35,7 +35,7 @@ export function LoginForm({ nextUrl }: { nextUrl?: string }) {
             Welcome back to <em>Foosha</em>
           </h2>
           <p className="sub">
-            Mandaue&apos;s food assistance network — where every donation is matched, tracked, and confirmed.
+            Cebu City&apos;s food assistance network — where every donation is matched, tracked, and confirmed.
           </p>
 
           <div className="ticket">

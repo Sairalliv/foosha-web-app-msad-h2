@@ -80,7 +80,7 @@ export function RegisterForm() {
             Every extra plate finds <em>the right</em> table.
           </h2>
           <p className="sub">
-            Join Mandaue City&apos;s food assistance network — give, receive, and make sure every
+            Join Cebu City&apos;s food assistance network — give, receive, and make sure every
             handoff is verified with a one-time code.
           </p>
 
@@ -105,7 +105,7 @@ export function RegisterForm() {
         <div className="auth-form-wrap">
           <div className="eyebrow">Join the network</div>
           <h1>Create your account</h1>
-          <p className="sub">Start giving or receiving food assistance in Mandaue City.</p>
+          <p className="sub">Start giving or receiving food assistance in Cebu City.</p>
 
           {state?.error && <div className="auth-error">{state.error}</div>}
 

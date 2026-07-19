@@ -29,7 +29,7 @@ export default function LandingPage() {
 
       <section className="hero wrap">
         <div>
-          <div className="eyebrow">Mandaue City Food Assistance Network</div>
+          <div className="eyebrow">Cebu City Food Assistance Network</div>
           <h1>
             Every extra plate
             <br />
@@ -158,7 +158,7 @@ export default function LandingPage() {
       <section id="leaderboard" className="landing wrap">
         <div className="section-head" style={{ marginBottom: 40, margin: "0 auto 48px", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>
-            Mandaue City · Top donors this month
+            Cebu City · Top donors this month
           </div>
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
@@ -224,7 +224,7 @@ export default function LandingPage() {
 
       <section className="cta-band wrap">
         <div className="eyebrow" style={{ justifyContent: "center" }}>Join the network</div>
-        <h2>Mandaue takes care of Mandaue.</h2>
+        <h2>Cebu City takes care of Cebu City.</h2>
         <div className="hero-actions" style={{ justifyContent: "center" }}>
           <Link href="/register" className="btn btn-primary btn-lg">I want to give</Link>
           <Link href="/register" className="btn btn-ghost btn-lg">I need help</Link>
@@ -233,7 +233,7 @@ export default function LandingPage() {
 
       <footer className="site">
         <div className="foot-wrap wrap">
-          <p>PROJECT FOOSHA · Mandaue City Food Assistance Network</p>
+          <p>PROJECT FOOSHA · Cebu City Food Assistance Network</p>
           <p>Built with the city, for the city.</p>
         </div>
       </footer>

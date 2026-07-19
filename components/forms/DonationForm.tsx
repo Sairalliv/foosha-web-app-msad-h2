@@ -79,7 +79,7 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
         </div>
         <div className="eyebrow">Foosha · Give</div>
         <h2>Make a Donation</h2>
-        <p className="sub">Your contribution goes straight to a family in Mandaue City.</p>
+        <p className="sub">Your contribution goes straight to a family in Cebu City.</p>
       </div>
 
       <div className="modal-body">
@@ -164,7 +164,7 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
                 id="location"
                 type="text"
                 required
-                placeholder="e.g. Barangay Basak, Mandaue City"
+                placeholder="e.g. Barangay Basak, Cebu City"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />

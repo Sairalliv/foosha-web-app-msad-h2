@@ -113,7 +113,7 @@ export function DonorDashboard() {
           <h1 className="text-4xl font-display mb-2">Welcome back, {displayName.split(' ')[0]}</h1>
           <p className="sub text-paper-dim">
             {profile?.barangay ? `Brgy. ${profile.barangay} · ` : ''}
-            Thank you for helping make Mandaue City a better place.
+            Thank you for helping make Cebu City a better place.
           </p>
         </div>
         <div className="welcome-avatar relative z-10 border-2 border-primary">{initials || 'D'}</div>

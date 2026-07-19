@@ -210,7 +210,7 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
                 id="address"
                 type="text"
                 required
-                placeholder="Complete address in Mandaue City"
+                placeholder="Complete address in Cebu City"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />

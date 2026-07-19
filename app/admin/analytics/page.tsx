@@ -7,7 +7,7 @@ export default function AnalyticsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', margin: '0 0 8px 0', color: 'var(--paper)' }}>Platform Analytics</h1>
-        <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>High-level metrics and distribution data for Mandaue City.</p>
+        <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>High-level metrics and distribution data for Cebu City.</p>
       </div>
 
       {/* High-level Metric Cards */}
