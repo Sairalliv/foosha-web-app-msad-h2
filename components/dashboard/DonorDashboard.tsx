@@ -275,13 +275,6 @@ export function DonorDashboard() {
         </div>
       </div>
 
-      {/* Donation map */}
-      <div style={{ marginTop: '32px' }}>
-        <NearbyMapPanel
-          title="Explore Donation Centers"
-          subtitle="View donation centers, NGOs, community pantries, and active drives across Cebu on an interactive map."
-        />
-      </div>
 
       {showForm && userId && (
         <Modal onClose={() => setShowForm(false)}>
