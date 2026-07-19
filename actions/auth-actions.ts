@@ -53,9 +53,14 @@ export async function registerAction(formData: FormData) {
 
   if (error) {
     console.error('Signup error:', error)
-    const errorMessage = typeof error.message === 'string' && error.message.length > 0 
-      ? error.message 
-      : JSON.stringify(error) !== '{}' ? JSON.stringify(error) : 'An unknown error occurred during sign up.'
+    
+    let errorMessage = 'An unexpected error occurred during sign up.'
+    if (error.message && error.message !== '{}') {
+      errorMessage = error.message
+    } else if (error.status === 500) {
+      errorMessage = 'Server configuration error: Unable to send confirmation email. Please check SMTP settings.'
+    }
+    
     return { error: errorMessage }
   }
 
