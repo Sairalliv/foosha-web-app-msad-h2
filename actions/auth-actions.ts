@@ -53,9 +53,10 @@ export async function registerAction(formData: FormData) {
 
   if (error) {
     console.error('Signup error:', error)
-    const errorMessage = typeof error.message === 'string' && error.message.length > 0 
-      ? error.message 
-      : JSON.stringify(error) !== '{}' ? JSON.stringify(error) : 'An unknown error occurred during sign up.'
+    const rawMsg = error.message
+    const errorMessage = typeof rawMsg === 'string' && rawMsg.length > 0 && rawMsg !== '{}'
+      ? rawMsg 
+      : JSON.stringify(error) !== '{}' ? JSON.stringify(error) : 'Database error: Ensure the "full_name" column exists in profiles.'
     return { error: errorMessage }
   }
 
