@@ -9,7 +9,8 @@ export interface DonationInput {
   type: DonationType
   category?: string | null
   description?: string | null
-  amount: number
+  quantity?: number | null
+  amount?: number | null
   location: string
 }
 
@@ -44,7 +45,8 @@ export async function createDonationAction(input: DonationInput) {
       type: input.type,
       category: input.type === 'food' ? (input.category ?? null) : null,
       description: input.type === 'food' ? (input.description?.trim() ?? null) : null,
-      amount: input.amount,
+      quantity: input.type === 'food' ? (input.quantity ?? null) : null,
+      amount: input.type === 'cash' ? (input.amount ?? null) : null,
       location: input.location.trim(),
       status: 'Waiting', // all new submissions start out unconfirmed (Waiting)
     })
