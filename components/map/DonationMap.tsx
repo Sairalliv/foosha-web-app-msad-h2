@@ -32,6 +32,14 @@ interface DonationMapProps {
   locations: DonationLocation[]
   selectedCategory: string | null
   searchQuery: string
+  /** CSS height for the map container. Defaults to the full-page map height. */
+  height?: string
+  /** Initial/default zoom level used when there's no single-result focus. */
+  defaultZoom?: number
+  /** Whether scrolling the mouse wheel over the map zooms it. Handy to turn
+   *  off when the map is embedded inside a scrollable dashboard panel so it
+   *  doesn't hijack page scrolling. */
+  scrollWheelZoom?: boolean
 }
 
 // Component to dynamically update map center
@@ -41,7 +49,14 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
   return null
 }
 
-export default function DonationMap({ locations, selectedCategory, searchQuery }: DonationMapProps) {
+export default function DonationMap({
+  locations,
+  selectedCategory,
+  searchQuery,
+  height = 'calc(100vh - 64px)',
+  defaultZoom = 11,
+  scrollWheelZoom = true,
+}: DonationMapProps) {
   const [mounted, setMounted] = useState(false)
   const defaultCenter: [number, number] = [10.3157, 123.8854] // Cebu City
 
@@ -51,7 +66,7 @@ export default function DonationMap({ locations, selectedCategory, searchQuery }
 
   if (!mounted) {
     return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center animate-pulse">
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center animate-pulse" style={{ height }}>
         <p className="text-gray-500 font-medium">Loading Map...</p>
       </div>
     )
@@ -75,14 +90,15 @@ export default function DonationMap({ locations, selectedCategory, searchQuery }
     : defaultCenter
 
   return (
-    <div className="w-full h-[calc(100vh-64px)] relative z-0">
+    <div className="w-full relative z-0" style={{ height }}>
       <MapContainer 
         center={defaultCenter} 
-        zoom={11} 
+        zoom={defaultZoom} 
         style={{ width: '100%', height: '100%' }}
         zoomControl={false}
+        scrollWheelZoom={scrollWheelZoom}
       >
-        <ChangeView center={mapCenter} zoom={filteredLocations.length === 1 ? 14 : 11} />
+        <ChangeView center={mapCenter} zoom={filteredLocations.length === 1 ? 14 : defaultZoom} />
         
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

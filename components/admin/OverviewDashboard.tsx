@@ -10,6 +10,7 @@ import {
   ShieldAlert
 } from 'lucide-react'
 import { getSupabaseService } from '@/lib/supabaseService.client'
+import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
 import type { MatchingQueueItem, VerificationItem, LeaderboardEntry, OverviewStats } from '@/lib/supabaseService'
 
 interface Props {
@@ -188,6 +189,14 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
           </div>
         </div>
       </div>
+
+      {/* Donation Locations Map */}
+      <NearbyMapPanel
+        title="Donation Locations"
+        subtitle="City-wide view of donation centers, pantries, and NGOs currently on the map."
+        height={360}
+        withTopMargin={false}
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

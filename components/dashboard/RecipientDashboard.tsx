@@ -5,6 +5,7 @@ import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck } from 'lu
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { HelpRequestForm } from '@/components/forms/HelpRequestForm'
+import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
 import type { Donation, HelpRequest, PriorityTier, Profile } from '@/lib/supabase/types'
 
 const TIER_LABELS: Record<PriorityTier, string> = {
@@ -295,6 +296,12 @@ export function RecipientDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Donation map */}
+      <NearbyMapPanel
+        title="Find Help Nearby"
+        subtitle="Donation centers, pantries, and NGOs across Cebu you can walk in to."
+      />
 
       {showForm && userId && (
         <Modal onClose={() => setShowForm(false)}>

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { getSupabaseService } from '@/lib/supabaseService.client'
 import { Modal } from '@/components/ui/Modal'
 import { DonationForm } from '@/components/forms/DonationForm'
+import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
 import type { Donation, Profile } from '@/lib/supabase/types'
 import type { LeaderboardEntry } from '@/lib/supabaseService'
 
@@ -182,6 +183,12 @@ export function DonorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Donation map */}
+      <NearbyMapPanel
+        title="Donation Map"
+        subtitle="See where donation centers, pantries, and NGOs across Cebu are located."
+      />
 
       {/* History + Leaderboard */}
       <div className="grid-2" style={{ marginTop: '32px' }}>
