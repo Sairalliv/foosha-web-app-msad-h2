@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Package, Banknote, MapPin } from 'lucide-react'
+import { Package, Banknote, MapPin, Tag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Donation, DonationType } from '@/lib/supabase/types'
+import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
 
 interface DonationFormProps {
   /** auth.users.id of the signed-in donor, used to scope the insert */
@@ -15,15 +16,27 @@ interface DonationFormProps {
 
 export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps) {
   const [type, setType] = useState<DonationType>('food')
+  const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [location, setLocation] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  const handleTypeChange = (nextType: DonationType) => {
+    setType(nextType)
+    // Fields mean different things per type (quantity vs. peso amount,
+    // food category doesn't apply to cash) — clear them on switch so a
+    // leftover value can't get submitted under the wrong meaning.
+    setCategory('')
+    setDescription('')
+    setAmount('')
+  }
+
   const isValid =
     location.trim().length > 0 &&
-    (type === 'food' ? description.trim().length > 0 : Number(amount) > 0)
+    Number(amount) > 0 &&
+    (type === 'food' ? description.trim().length > 0 && category.trim().length > 0 : true)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,8 +65,9 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
       .insert({
         donor_id: user.id,
         type,
+        category: type === 'food' ? category : null,
         description: type === 'food' ? description.trim() : null,
-        amount: type === 'cash' ? Number(amount) : null,
+        amount: Number(amount),
         location: location.trim(),
         status: 'Waiting', // all new submissions start out unconfirmed
       })
@@ -90,7 +104,7 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
           <div className="type-toggle" style={{ marginBottom: '20px', maxWidth: 'none' }}>
             <button
               type="button"
-              onClick={() => setType('food')}
+              onClick={() => handleTypeChange('food')}
               className={type === 'food' ? 'active' : ''}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
@@ -98,7 +112,7 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
             </button>
             <button
               type="button"
-              onClick={() => setType('cash')}
+              onClick={() => handleTypeChange('cash')}
               className={type === 'cash' ? 'active' : ''}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
@@ -112,17 +126,59 @@ export function DonationForm({ donorId, onCancel, onCreated }: DonationFormProps
           </p>
 
           {type === 'food' ? (
-            <div className="field">
-              <label htmlFor="description">Item Details *</label>
-              <textarea
-                id="description"
-                rows={3}
-                required
-                placeholder="e.g. rice, canned goods, instant noodles"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+            <>
+              <div className="field">
+                <label htmlFor="category">Category *</label>
+                <div className="input-icon-wrap">
+                  <Tag size={16} />
+                  <select
+                    id="category"
+                    required
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    style={{ paddingLeft: '40px' }}
+                  >
+                    <option value="" disabled>
+                      Select a category
+                    </option>
+                    {FOOD_CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="field">
+                <label htmlFor="amount">Amount *</label>
+                <input
+                  id="amount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  required
+                  placeholder="e.g. 5"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <p className="type-toggle-caption" style={{ margin: '6px 0 0' }}>
+                  Number of kilos, packs, or sacks — whichever unit makes sense for this item.
+                </p>
+              </div>
+
+              <div className="field">
+                <label htmlFor="description">Item Details *</label>
+                <textarea
+                  id="description"
+                  rows={3}
+                  required
+                  placeholder="e.g. rice, canned goods, instant noodles"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </>
           ) : (
             <div className="field">
               <label htmlFor="amount">Amount (₱) *</label>

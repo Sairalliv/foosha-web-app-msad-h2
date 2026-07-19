@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Package, Banknote, MapPin, Calendar, PlusCircle } from 'lucide-react'
+import { Package, Banknote, MapPin, Calendar, PlusCircle, Tag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getSupabaseService } from '@/lib/supabaseService.client'
 import { Modal } from '@/components/ui/Modal'
@@ -169,6 +169,14 @@ export function DonorDashboard() {
                     {d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()}` : d.description}
                   </div>
                   <div className="meta" style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
+                    {d.type === 'food' && (d.category || d.amount != null) && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Tag size={12} />
+                        {d.category}
+                        {d.category && d.amount != null ? ' · ' : ''}
+                        {d.amount != null ? `Qty ${d.amount}` : ''}
+                      </span>
+                    )}
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <MapPin size={12} /> {d.location}
                     </span>
@@ -217,7 +225,22 @@ export function DonorDashboard() {
                           {d.type === 'food' ? <Package size={11} /> : <Banknote size={11} />} {d.type}
                         </span>
                       </td>
-                      <td>{d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()}` : d.description}</td>
+                      <td>
+                        {d.type === 'cash' ? (
+                          `₱${(d.amount ?? 0).toLocaleString()}`
+                        ) : (
+                          <div>
+                            <div>{d.description}</div>
+                            {(d.category || d.amount != null) && (
+                              <div className="meta" style={{ marginTop: '2px' }}>
+                                {d.category}
+                                {d.category && d.amount != null ? ' · ' : ''}
+                                {d.amount != null ? `Qty ${d.amount}` : ''}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </td>
                       <td className="id-cell">{new Date(d.created_at).toLocaleDateString()}</td>
                       <td>
                         <span className={`status-chip ${d.status === 'Given' ? 'confirmed' : 'awaiting_pickup'}`}>{d.status}</span>

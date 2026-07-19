@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Package, Banknote, HandHeart, CircleUserRound, Accessibility, Baby, Check, MapPin } from 'lucide-react'
+import { Package, Banknote, HandHeart, CircleUserRound, Accessibility, Baby, Check, MapPin, Tag } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { HelpRequest, PriorityTier, RequestType } from '@/lib/supabase/types'
+import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
 
 interface HelpRequestFormProps {
   /** auth.users.id of the signed-in recipient, used to scope the insert */
@@ -34,15 +35,28 @@ function computeTier(flags: Record<string, boolean>): PriorityTier {
 
 export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpRequestFormProps) {
   const [type, setType] = useState<RequestType>('food')
+  const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('') // optional even for cash requests
+  const [amount, setAmount] = useState('') // required quantity for food, optional peso amount for cash
   const [address, setAddress] = useState('')
   const [flags, setFlags] = useState<Record<string, boolean>>({ elderly: false, pwd: false, infant: false })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const priorityTier = computeTier(flags)
-  const isValid = address.trim().length > 0 && (type === 'food' ? description.trim().length > 0 : true)
+  const isValid =
+    address.trim().length > 0 &&
+    (type === 'food' ? description.trim().length > 0 && category.trim().length > 0 && Number(amount) > 0 : true)
+
+  const handleTypeChange = (nextType: RequestType) => {
+    setType(nextType)
+    // Fields mean different things per type (quantity vs. peso amount,
+    // food category doesn't apply to cash) — clear them on switch so a
+    // leftover value can't get submitted under the wrong meaning.
+    setCategory('')
+    setDescription('')
+    setAmount('')
+  }
 
   const toggleFlag = (key: string) => {
     setFlags((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -75,6 +89,7 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
       .insert({
         recipient_id: user.id,
         type,
+        category: type === 'food' ? category : null,
         description: type === 'food' ? description.trim() : null,
         amount: amount.trim() ? Number(amount) : null,
         priority_tier: priorityTier,
@@ -114,7 +129,7 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
           <div className="type-toggle" style={{ marginBottom: '20px', maxWidth: 'none' }}>
             <button
               type="button"
-              onClick={() => setType('food')}
+              onClick={() => handleTypeChange('food')}
               className={type === 'food' ? 'active' : ''}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
@@ -122,7 +137,7 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
             </button>
             <button
               type="button"
-              onClick={() => setType('cash')}
+              onClick={() => handleTypeChange('cash')}
               className={type === 'cash' ? 'active' : ''}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
@@ -136,17 +151,59 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
           </p>
 
           {type === 'food' ? (
-            <div className="field">
-              <label htmlFor="description">What does your household need? *</label>
-              <textarea
-                id="description"
-                rows={3}
-                required
-                placeholder="e.g. rice, canned goods, powdered milk"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+            <>
+              <div className="field">
+                <label htmlFor="category">Category *</label>
+                <div className="input-icon-wrap">
+                  <Tag size={16} />
+                  <select
+                    id="category"
+                    required
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    style={{ paddingLeft: '40px' }}
+                  >
+                    <option value="" disabled>
+                      Select a category
+                    </option>
+                    {FOOD_CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="field">
+                <label htmlFor="amount">Amount Needed *</label>
+                <input
+                  id="amount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  required
+                  placeholder="e.g. 5"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <p className="type-toggle-caption" style={{ margin: '6px 0 0' }}>
+                  Number of kilos, packs, or sacks — whichever unit makes sense for this item.
+                </p>
+              </div>
+
+              <div className="field">
+                <label htmlFor="description">What does your household need? *</label>
+                <textarea
+                  id="description"
+                  rows={3}
+                  required
+                  placeholder="e.g. rice, canned goods, powdered milk"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </>
           ) : (
             <div className="field">
               <label htmlFor="amount">Amount needed (₱, optional)</label>
