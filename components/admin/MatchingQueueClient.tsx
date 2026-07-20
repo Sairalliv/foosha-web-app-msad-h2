@@ -3,13 +3,92 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseService } from '@/lib/supabaseService.client'
-import type { Donation, HelpRequest } from '@/lib/supabaseService'
+import type { Donation, HelpRequest, Priority } from '@/lib/supabaseService'
+
+// Lower number = higher priority. "General" is last, per the matching rules.
+const PRIORITY_ORDER: Record<Priority, number> = {
+  elderly: 0,
+  pwd: 1,
+  infant: 2,
+  general: 3,
+}
+
+/**
+ * Finds the single best donation/request pair from the given pools, following
+ * the auto-match rules:
+ *   1. Type must match (food<->food, cash<->cash)
+ *   2. Requests are considered in priority order: elderly > pwd > infant > general
+ *   3. Ties within the same tier go to whoever has waited longest (oldest date)
+ *   4/5. Only items present in the pools passed in are considered (callers are
+ *        responsible for excluding already-matched or already-suggested items)
+ */
+function findBestPair(
+  donations: Donation[],
+  requests: HelpRequest[]
+): { donation: Donation; request: HelpRequest } | null {
+  const sortedRequests = [...requests].sort((a, b) => {
+    const tierDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+    if (tierDiff !== 0) return tierDiff
+    // Oldest submission first (ascending date)
+    return a.date.localeCompare(b.date)
+  })
+
+  for (const request of sortedRequests) {
+    const eligibleDonations = donations
+      .filter((d) => d.type === request.type)
+      .sort((a, b) => a.date.localeCompare(b.date)) // oldest donation first
+
+    if (eligibleDonations.length > 0) {
+      return { donation: eligibleDonations[0], request }
+    }
+  }
+
+  return null
+}
 
 export function MatchingQueueClient({ initialDonations, initialRequests }: { initialDonations: Donation[], initialRequests: HelpRequest[] }) {
   const router = useRouter()
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null)
   const [selectedRequest, setSelectedRequest] = useState<HelpRequest | null>(null)
   const [isMatching, setIsMatching] = useState(false)
+  // IDs already offered as auto-match suggestions this round, so repeated
+  // "Auto Match" clicks cycle through pairs instead of repeating the same one.
+  const [autoSkipDonationIds, setAutoSkipDonationIds] = useState<Set<string>>(new Set())
+  const [autoSkipRequestIds, setAutoSkipRequestIds] = useState<Set<string>>(new Set())
+  const [autoMatchNotice, setAutoMatchNotice] = useState<string | null>(null)
+
+  const selectDonation = (donation: Donation) => {
+    setAutoMatchNotice(null)
+    setAutoSkipDonationIds(new Set())
+    setAutoSkipRequestIds(new Set())
+    setSelectedDonation((prev) => (prev?.id === donation.id ? null : donation))
+  }
+
+  const selectRequest = (request: HelpRequest) => {
+    setAutoMatchNotice(null)
+    setAutoSkipDonationIds(new Set())
+    setAutoSkipRequestIds(new Set())
+    setSelectedRequest((prev) => (prev?.id === request.id ? null : request))
+  }
+
+  const handleAutoMatch = () => {
+    setAutoMatchNotice(null)
+
+    const availableDonations = initialDonations.filter((d) => !autoSkipDonationIds.has(d.id))
+    const availableRequests = initialRequests.filter((r) => !autoSkipRequestIds.has(r.id))
+
+    const best = findBestPair(availableDonations, availableRequests)
+
+    if (!best) {
+      setAutoMatchNotice('No eligible pairs left to suggest — try a manual match instead.')
+      return
+    }
+
+    setSelectedDonation(best.donation)
+    setSelectedRequest(best.request)
+    setAutoSkipDonationIds((prev) => new Set(prev).add(best.donation.id))
+    setAutoSkipRequestIds((prev) => new Set(prev).add(best.request.id))
+  }
 
   const handleMatch = async () => {
     if (!selectedDonation || !selectedRequest) return
@@ -19,6 +98,9 @@ export function MatchingQueueClient({ initialDonations, initialRequests }: { ini
       await supabaseService.createMatch(selectedDonation.id, selectedRequest.id)
       setSelectedDonation(null)
       setSelectedRequest(null)
+      setAutoSkipDonationIds(new Set())
+      setAutoSkipRequestIds(new Set())
+      setAutoMatchNotice(null)
       // Re-fetch the server component's data so the matched pair drops out
       // of the "Available"/"Pending" lists instead of lingering stale.
       router.refresh()
@@ -32,9 +114,34 @@ export function MatchingQueueClient({ initialDonations, initialRequests }: { ini
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', height: '100%', position: 'relative' }}>
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', margin: '0 0 8px 0', color: 'var(--paper)' }}>Matching Queue</h1>
-        <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>Select a donation and a request to create a match.</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '24px' }}>
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', margin: '0 0 8px 0', color: 'var(--paper)' }}>Matching Queue</h1>
+          <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>Select a donation and a request to create a match, or let Auto Match suggest a pair.</p>
+          {autoMatchNotice && (
+            <p style={{ color: 'var(--kalamansi)', margin: '8px 0 0 0', fontSize: '13px' }}>{autoMatchNotice}</p>
+          )}
+        </div>
+
+        <button
+          onClick={handleAutoMatch}
+          disabled={isMatching}
+          style={{
+            background: 'transparent',
+            color: 'var(--kalamansi)',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontWeight: 600,
+            fontSize: '14px',
+            border: '1px solid var(--kalamansi)',
+            cursor: isMatching ? 'not-allowed' : 'pointer',
+            opacity: isMatching ? 0.5 : 1,
+            whiteSpace: 'nowrap',
+            transition: 'all 0.2s'
+          }}
+        >
+          ✨ Auto Match
+        </button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', paddingBottom: '100px' }}>
@@ -48,11 +155,11 @@ export function MatchingQueueClient({ initialDonations, initialRequests }: { ini
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {initialDonations.map(donation => {
               const isSelected = selectedDonation?.id === donation.id
-              const isCash = donation.item.toLowerCase().includes('cash')
+              const isCash = donation.type === 'cash'
               return (
                 <div 
                   key={donation.id} 
-                  onClick={() => setSelectedDonation(donation)}
+                  onClick={() => selectDonation(donation)}
                   style={{ 
                     background: isSelected ? 'rgba(199, 217, 77, 0.1)' : 'var(--bg-panel)',
                     border: `1px solid ${isSelected ? 'var(--kalamansi)' : 'var(--line)'}`,
@@ -105,7 +212,7 @@ export function MatchingQueueClient({ initialDonations, initialRequests }: { ini
               return (
                 <div 
                   key={request.id} 
-                  onClick={() => setSelectedRequest(request)}
+                  onClick={() => selectRequest(request)}
                   style={{ 
                     background: isSelected ? 'rgba(199, 217, 77, 0.1)' : 'var(--bg-panel)',
                     border: `1px solid ${isSelected ? 'var(--kalamansi)' : 'var(--line)'}`,

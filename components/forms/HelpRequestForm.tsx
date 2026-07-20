@@ -85,17 +85,27 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
       return
     }
 
+    // Resolve the requestor's display name (requestor_name is NOT NULL in the DB)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+
+    const requestorName = profile?.full_name ?? user.email ?? 'Anonymous'
+
     const { data, error: insertError } = await supabase
       .from('requests')
       .insert({
         recipient_id: user.id,
+        requestor_name: requestorName,
         type,
         category: type === 'food' ? category : null,
-        description: type === 'food' ? description.trim() : null,
+        description: type === 'food' ? description.trim() : 'Cash assistance request',
         amount: amount.trim() ? Number(amount) : null,
         priority_tier: priorityTier,
         address: address.trim(),
-        status: 'unmatched', // the system picks this up for matching
+        status: 'unmatched',
       })
       .select()
       .single()

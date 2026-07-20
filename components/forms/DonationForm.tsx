@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { Package, Banknote, MapPin, Tag } from 'lucide-react'
 import type { Donation, DonationType } from '@/lib/supabase/types'
 import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
@@ -194,6 +195,35 @@ export function DonationForm({ donorId: _donorId, onCancel, onCreated }: Donatio
                   onChange={(e) => setAmount(e.target.value)}
                   style={{ paddingLeft: '30px' }}
                 />
+              </div>
+
+              <div
+                className="field"
+                style={{ textAlign: 'center', marginTop: '16px' }}
+              >
+                <label style={{ display: 'block', marginBottom: '10px' }}>
+                  Scan to Send Cash Donation
+                </label>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    border: '1px solid var(--paper-border, #e0ddd6)',
+                    borderRadius: '12px',
+                    padding: '8px',
+                    background: '#fff',
+                  }}
+                >
+                  <Image
+                    src="/assets/cash-donation-qr.jpg"
+                    alt="Scan this QR code with your banking app to send a cash donation"
+                    width={220}
+                    height={310}
+                    style={{ width: '220px', height: 'auto', display: 'block' }}
+                  />
+                </div>
+                <p className="type-toggle-caption" style={{ margin: '8px 0 0' }}>
+                  Scan with your banking or InstaPay-enabled app, then submit this form to log your donation.
+                </p>
               </div>
             </div>
           )}
