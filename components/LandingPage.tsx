@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import LandingNav from "./LandingNav";
 import { getSupabaseService } from "@/lib/supabaseService.server";
 import type { LeaderboardEntry } from "@/lib/supabaseService";
 
@@ -12,30 +13,9 @@ export default async function LandingPage() {
 
   return (
     <div>
-      <header className="site">
-        <nav className="site">
-          <Image
-            className="logo-mark"
-            style={{ marginBottom: 0, height: 30, width: "auto" }}
-            src="/assets/foosha-logo.png"
-            alt="Foosha"
-            width={712}
-            height={201}
-            priority
-          />
-          <div className="navlinks">
-            <a href="#how-it-works">How it works</a>
-            <a href="#trust-codes">Trust &amp; codes</a>
-            <a href="#leaderboard">Leaderboard</a>
-            <Link href="/map">Donation Map</Link>
-          </div>
-          <div className="nav-cta">
-            <Link href="/register" className="btn btn-primary">Sign up</Link>
-          </div>
-        </nav>
-      </header>
+      <LandingNav />
 
-      <section className="hero wrap">
+      <section className="hero wrap flex flex-col lg:grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-14 pt-12 lg:pt-20">
         <div>
           <div className="eyebrow">Cebu City Food Assistance Network</div>
           <h1>
@@ -48,9 +28,9 @@ export default async function LandingPage() {
             and infants first. Every handoff is sealed with a one-time code, so nothing gets marked done until
             it&apos;s really in someone&apos;s hands.
           </p>
-          <div className="hero-actions">
-            <Link href="/register" className="btn btn-primary btn-lg">I want to give</Link>
-            <Link href="/register" className="btn btn-ghost btn-lg">I need help</Link>
+          <div className="hero-actions flex flex-col sm:flex-row w-full gap-4">
+            <Link href="/register" className="btn btn-primary btn-lg w-full sm:w-auto text-center justify-center">I want to give</Link>
+            <Link href="/register" className="btn btn-ghost btn-lg w-full sm:w-auto text-center justify-center">I need help</Link>
           </div>
         </div>
 
@@ -70,13 +50,13 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="landing wrap">
+      <section id="how-it-works" className="landing wrap py-12 lg:py-20">
         <div className="section-head">
           <div className="eyebrow">How it works</div>
           <h2>One app, three ways in.</h2>
           <p className="sub">Donors give, recipients ask, the city makes sure it lands where it&apos;s needed most.</p>
         </div>
-        <div className="roles">
+        <div className="roles grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="role-card">
             <span className="tag">Donors</span>
             <h3>Give, and get recognized for it</h3>
@@ -107,7 +87,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="trust-codes" className="landing wrap">
+      <section id="trust-codes" className="landing wrap py-12 lg:py-20">
         <div className="section-head">
           <div className="eyebrow">Trust &amp; codes</div>
           <h2>Nothing counts until it&apos;s confirmed.</h2>
@@ -115,7 +95,7 @@ export default async function LandingPage() {
             Every match gets a one-time code, like an OTP. No fake deliveries, no stolen donations.
           </p>
         </div>
-        <div className="trust-wrap">
+        <div className="trust-wrap grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-[var(--bg-deep)] border border-[var(--line)] rounded-2xl p-8 lg:p-14">
           <div className="flow">
             <div className="flow-step done">
               <div className="flow-num">1</div>
@@ -163,7 +143,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="leaderboard" className="landing wrap">
+      <section id="leaderboard" className="landing wrap py-12 lg:py-20">
         <div className="section-head" style={{ marginBottom: 40, margin: "0 auto 48px", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>
             Cebu City · Top donors
@@ -171,8 +151,8 @@ export default async function LandingPage() {
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
 
-        <div className="public-leaderboard">
-          <div className="lb-header">
+        <div className="public-leaderboard bg-[var(--paper)] text-[var(--ink)] rounded-xl p-6 lg:p-10 max-w-[800px] mx-auto shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
+          <div className="lb-header hidden sm:grid grid-cols-[50px_1fr_120px] lg:grid-cols-[60px_1fr_140px] gap-4 text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-4">
             <div>Rank</div>
             <div>Donor</div>
             <div style={{ textAlign: "right" }}>Lifetime Given</div>
@@ -184,33 +164,37 @@ export default async function LandingPage() {
             </p>
           ) : (
             leaderboard.map((entry) => (
-              <div key={entry.rank} className={`lb-row ${entry.rank === 1 ? "top-rank" : ""}`}>
-                <div className="rank-num">{entry.rank}</div>
+              <div key={entry.rank} className={`lb-row flex flex-col sm:grid sm:grid-cols-[50px_1fr_120px] lg:grid-cols-[60px_1fr_140px] gap-2 sm:gap-4 items-start sm:items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
+                <div className="flex items-center gap-4 sm:contents">
+                  <div className="rank-num text-xl sm:text-2xl font-black text-[var(--ink-soft)]">{entry.rank}</div>
+                  <div className="sm:hidden font-semibold text-base text-[var(--ink)]">{entry.name}</div>
+                  <div className="sm:hidden font-mono text-sm font-semibold text-[var(--bg-deep)] ml-auto">{entry.amount}</div>
+                </div>
                 <div>
-                  <div className="name">{entry.name}</div>
+                  <div className="name hidden sm:block font-semibold text-base">{entry.name}</div>
                   {entry.badges.length > 0 && (
-                    <div className="badges">
+                    <div className="badges flex flex-wrap gap-2 mt-1 sm:mt-2">
                       {entry.badges.map((badge) => (
-                        <span key={badge} className={`badge-pill ${badge === "bayani" ? "bayani" : "first"}`}>
+                        <span key={badge} className={`badge-pill font-mono text-[10px] px-2 py-1 rounded-full ${badge === "bayani" ? "bg-[rgba(232,84,47,0.2)] text-[var(--jeepney-dark)] font-semibold" : "bg-[rgba(199,217,77,0.3)] text-[var(--bg-deep)] font-semibold"}`}>
                           {badge === "bayani" ? "Bayani ng Barangay" : "First Harvest"}
                         </span>
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="amount">{entry.amount}</div>
+                <div className="amount hidden sm:block font-mono text-[15px] font-semibold text-right text-[var(--bg-deep)]">{entry.amount}</div>
               </div>
             ))
           )}
         </div>
       </section>
 
-      <section className="cta-band wrap">
+      <section className="cta-band wrap py-12 lg:py-24">
         <div className="eyebrow" style={{ justifyContent: "center" }}>Join the network</div>
         <h2>Cebu City takes care of Cebu City.</h2>
-        <div className="hero-actions" style={{ justifyContent: "center" }}>
-          <Link href="/register" className="btn btn-primary btn-lg">I want to give</Link>
-          <Link href="/register" className="btn btn-ghost btn-lg">I need help</Link>
+        <div className="hero-actions flex flex-col sm:flex-row w-full gap-4 mt-8" style={{ justifyContent: "center" }}>
+          <Link href="/register" className="btn btn-primary btn-lg w-full sm:w-auto text-center justify-center">I want to give</Link>
+          <Link href="/register" className="btn btn-ghost btn-lg w-full sm:w-auto text-center justify-center">I need help</Link>
         </div>
       </section>
 

@@ -477,7 +477,8 @@ nav.site{display:flex; align-items:center; justify-content:space-between; paddin
 .nav-cta{display:flex; gap:10px;}
 .btn-lg{padding:15px 28px; font-size:15px; border-radius:4px;}
 
-.hero{position:relative; z-index:1; padding:80px 0; display:grid; grid-template-columns:1.15fr 0.85fr; gap:56px; align-items:center;}
+.hero{position:relative; z-index:1; align-items:center;}
+/* Note: Layout and padding handled via Tailwind in JSX */
 .hero h1{font-size:clamp(38px,5vw,64px); line-height:1.04; margin-bottom:24px;}
 .hero h1 em{font-style:italic; font-weight:500; color:var(--kalamansi);}
 .hero .sub{font-size:18px; max-width:480px; margin-bottom:36px;}
@@ -487,7 +488,7 @@ section.landing{position:relative; z-index:1; padding:72px 0; scroll-margin-top:
 .section-head{max-width:620px; margin-bottom:48px;}
 .section-head .eyebrow{color:var(--jeepney);}
 
-.roles{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+.roles{/* Layout handled via Tailwind */}
 .role-card{background:var(--bg-deep); border:1px solid var(--line); border-radius:10px; padding:32px 28px; transition:border-color .2s, transform .2s;}
 .role-card:hover{border-color:rgba(244,236,216,0.22); transform:translateY(-3px);}
 .role-card .tag{font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--kalamansi); margin-bottom:18px; display:block;}
@@ -498,7 +499,7 @@ section.landing{position:relative; z-index:1; padding:72px 0; scroll-margin-top:
 .role-card.recipient .tag, .role-card.recipient li::before{color:var(--jeepney);}
 .role-card.admin .tag, .role-card.admin li::before{color:var(--teal);}
 
-.trust-wrap{background:var(--bg-deep); border:1px solid var(--line); border-radius:14px; padding:56px 48px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;}
+.trust-wrap{/* Styling handled via Tailwind */}
 .flow{display:flex; flex-direction:column;}
 .flow-step{display:flex; gap:18px; padding:18px 0; position:relative;}
 .flow-step:not(:last-child)::after{content:""; position:absolute; left:17px; top:52px; bottom:-6px; width:1.5px; background:var(--line);}
@@ -514,36 +515,9 @@ footer.site{border-top:1px solid var(--line); padding:40px 0; position:relative;
 .foot-wrap p{font-size:13px; color:var(--paper-dim); font-family:var(--font-mono);}
 
 /* ── Public Leaderboard ────────────────────────────────────────── */
-.public-leaderboard{
-  background:var(--paper);
-  color:var(--ink);
-  border-radius:12px;
-  padding:32px 40px;
-  max-width:800px;
-  margin:0 auto;
-  box-shadow:0 30px 60px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.04);
-}
-.public-leaderboard .lb-header{
-  display:grid;
-  grid-template-columns:60px 1fr 140px;
-  gap:16px;
-  font-family:var(--font-mono);
-  font-size:11px;
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  color:var(--ink-soft);
-  border-bottom:2px dashed rgba(28,42,34,0.15);
-  padding-bottom:16px;
-  margin-bottom:16px;
-}
-.public-leaderboard .lb-row{
-  display:grid;
-  grid-template-columns:60px 1fr 140px;
-  gap:16px;
-  align-items:center;
-  padding:16px 0;
-  border-bottom:1px solid rgba(28,42,34,0.1);
-}
+.public-leaderboard{/* Layout handled via Tailwind */}
+.public-leaderboard .lb-header{/* Layout handled via Tailwind */}
+.public-leaderboard .lb-row{/* Layout handled via Tailwind */}
 .public-leaderboard .lb-row:last-child{
   border-bottom:none;
 }
