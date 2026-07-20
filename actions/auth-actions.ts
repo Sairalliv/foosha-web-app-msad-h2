@@ -67,5 +67,5 @@ export async function logoutAction() {
   await supabase.auth.signOut()
   
   revalidatePath('/', 'layout')
-  redirect('/login')
+  redirect('/')
 }

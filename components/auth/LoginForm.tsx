@@ -57,6 +57,9 @@ export function LoginForm({ nextUrl }: { nextUrl?: string }) {
       {/* Right form panel */}
       <div className="auth-form-side">
         <div className="auth-form-wrap">
+          <Link href="/" className="auth-back-link">
+            ← Back to Landing Page
+          </Link>
           <div className="eyebrow">Welcome back</div>
           <h1>Log in to Foosha</h1>
           <p className="sub">Enter your email and password to continue.</p>
