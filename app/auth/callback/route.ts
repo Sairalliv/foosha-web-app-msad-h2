@@ -1,11 +1,27 @@
-import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export async function GET(request: Request) {
+/**
+ * GET /auth/callback
+ *
+ * Supabase OAuth (e.g. Google Sign-In) redirects back here with a
+ * one-time `code` query parameter. This route exchanges that code
+ * for a Supabase session cookie, then forwards the user to their
+ * destination.
+ *
+ * Required: Register this URL in Google Cloud Console →
+ * Authorised redirect URIs:
+ *   - http://localhost:3000/auth/callback   (local dev)
+ *   - https://<your-production-domain>/auth/callback  (production)
+ *
+ * Supabase also requires the same URL in:
+ *   Dashboard → Authentication → URL Configuration → Redirect URLs
+ */
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  
-  // if "next" is in param, use it as the redirect URL
+  // Where to send the user after login (if "next" is in param, use it, defaults to /dashboard)
   const next = searchParams.get('next') ?? '/dashboard'
 
   if (code) {

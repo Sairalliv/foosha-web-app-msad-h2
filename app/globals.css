@@ -367,6 +367,19 @@ h3{font-family:var(--font-display); font-weight:700; font-size:17px;}
 .field .input-icon-wrap svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--paper-dim); pointer-events:none;}
 .field .input-icon-wrap input{padding-left:40px;}
 
+/* ── Location picker (click-a-map-point → address autofill) ─────── */
+.location-picker{margin-top:8px;}
+.location-picker-toggle{display:inline-flex; align-items:center; gap:6px; background:transparent; border:1px solid var(--line); color:var(--kalamansi); font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:20px; cursor:pointer; transition:border-color .2s, background .2s;}
+.location-picker-toggle:hover{border-color:var(--kalamansi); background:rgba(199,217,77,0.08);}
+.location-picker-panel{margin-top:10px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--bg-deep);}
+.location-picker-map{width:100%; height:260px; position:relative; z-index:0;}
+.location-picker-map-loading{width:100%; height:260px; display:flex; align-items:center; justify-content:center; color:var(--paper-dim); font-size:13px;}
+.location-picker-status{padding:10px 14px; font-size:12.5px; color:var(--paper-dim); border-top:1px solid var(--line);}
+.location-picker-resolving{display:inline-flex; align-items:center; gap:6px; color:var(--kalamansi);}
+.location-picker-error{color:var(--jeepney);}
+.location-picker-spin{animation:location-picker-spin .8s linear infinite;}
+@keyframes location-picker-spin{to{transform:rotate(360deg);}}
+
 /* ── Modal segmented type toggle: helper caption under active tab ── */
 .type-toggle-caption{font-size:12.5px; color:var(--paper-dim); margin:-12px 0 20px; display:flex; align-items:center; gap:6px;}
 

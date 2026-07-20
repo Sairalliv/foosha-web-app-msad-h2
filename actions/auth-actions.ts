@@ -52,7 +52,16 @@ export async function registerAction(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    console.error('Signup error:', error)
+    
+    let errorMessage = 'An unexpected error occurred during sign up.'
+    if (error.message && error.message !== '{}') {
+      errorMessage = error.message
+    } else if (error.status === 500) {
+      errorMessage = 'Server configuration error: Unable to send confirmation email. Please check SMTP settings.'
+    }
+    
+    return { error: errorMessage }
   }
 
   // Usually users need to confirm their email depending on Supabase settings.
