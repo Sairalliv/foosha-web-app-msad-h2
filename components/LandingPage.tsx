@@ -14,7 +14,7 @@ export default async function LandingPage() {
     <div>
       <LandingNav />
 
-      <section className="hero wrap flex flex-col lg:grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-14 pt-20 sm:pt-24 lg:pt-28">
+      <section className="hero wrap flex flex-col lg:grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-14 pt-28 sm:pt-32 lg:pt-36">
         <div>
           <div className="eyebrow">Cebu City Food Assistance Network</div>
           <h1>
