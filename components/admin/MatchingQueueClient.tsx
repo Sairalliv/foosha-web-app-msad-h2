@@ -50,6 +50,13 @@ function findBestPair(
       const exactMatches = eligibleDonations.filter(d => getCategory(d.item) === reqCategory)
       if (exactMatches.length > 0) {
         eligibleDonations = exactMatches
+      } else {
+        // No exact match found.
+        // For general households, require an exact match, so skip if none found.
+        if (request.priority === 'general') {
+          continue
+        }
+        // For priority tiers (elderly, pwd, infant), fallback to ANY food if no exact match.
       }
     }
       
