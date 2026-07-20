@@ -38,6 +38,7 @@ export interface HelpRequest {
   id: string
   requestor: string
   need: string
+  type: DonationType
   priority: Priority
   barangay: string
   neighborhood: string
@@ -159,6 +160,7 @@ function mapRequest(row: DbHelpRequest, requestorName?: string | null): HelpRequ
     id: row.id,
     requestor: requestorName || 'Unknown household',
     need: isCash ? 'Cash Assistance' : foodNeed,
+    type: row.type,
     priority: row.priority_tier,
     barangay: row.address,
     neighborhood: row.address,
@@ -374,13 +376,27 @@ export function createSupabaseService(supabase: SupabaseClient) {
   },
 
   // Platform-wide figures for the admin Analytics page.
-  async getAnalytics(): Promise<AnalyticsSummary> {
+  // rangeDays limits results to records created in the last N days;
+  // pass null (or omit) for all-time figures.
+  async getAnalytics(rangeDays: number | null = null): Promise<AnalyticsSummary> {
+    const cutoffIso = rangeDays == null ? null : new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString()
+
+    let requestsQuery = supabase.from('requests').select('recipient_id, status, created_at')
+    let donationsQuery = supabase.from('donations').select('type, amount, status, created_at')
+    let matchesQuery = supabase
+      .from('matches')
+      .select('status, created_at, requests:request_id ( created_at, address )')
+
+    if (cutoffIso) {
+      requestsQuery = requestsQuery.gte('created_at', cutoffIso)
+      donationsQuery = donationsQuery.gte('created_at', cutoffIso)
+      matchesQuery = matchesQuery.gte('created_at', cutoffIso)
+    }
+
     const [requestsRes, donationsRes, matchesRes] = await Promise.all([
-      supabase.from('requests').select('recipient_id, status'),
-      supabase.from('donations').select('type, amount, status'),
-      supabase
-        .from('matches')
-        .select('status, created_at, requests:request_id ( created_at, address )'),
+      requestsQuery,
+      donationsQuery,
+      matchesQuery,
     ])
 
     if (requestsRes.error) throw requestsRes.error

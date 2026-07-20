@@ -1,5 +1,6 @@
 import { getSupabaseService } from '@/lib/supabaseService.server'
 import type { AnalyticsSummary } from '@/lib/supabaseService'
+import { AnalyticsRangeSelect } from '@/components/admin/AnalyticsRangeSelect'
 
 export const metadata = {
   title: 'Analytics - Foosha Admin',
@@ -14,15 +15,26 @@ const EMPTY_ANALYTICS: AnalyticsSummary = {
   matchesByBarangay: [],
 }
 
+const VALID_RANGES = new Set(['7', '30', '90', 'all'])
+
 function formatPhp(amount: number): string {
   if (amount >= 1_000_000) return `₱${(amount / 1_000_000).toFixed(1)}M`
   if (amount >= 1_000) return `₱${(amount / 1_000).toFixed(1)}K`
   return `₱${amount.toLocaleString()}`
 }
 
-export default async function AnalyticsPage() {
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedParams = await searchParams
+  const rawRange = resolvedParams?.range
+  const range = typeof rawRange === 'string' && VALID_RANGES.has(rawRange) ? rawRange : 'all'
+  const rangeDays = range === 'all' ? null : Number(range)
+
   const supabaseService = await getSupabaseService()
-  const analytics = await supabaseService.getAnalytics().catch((err) => {
+  const analytics = await supabaseService.getAnalytics(rangeDays).catch((err) => {
     console.error('Failed to load analytics:', err)
     return EMPTY_ANALYTICS
   })
@@ -43,9 +55,12 @@ export default async function AnalyticsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', margin: '0 0 8px 0', color: 'var(--paper)' }}>Platform Analytics</h1>
-        <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>High-level metrics and distribution data for Cebu City.</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '24px' }}>
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', margin: '0 0 8px 0', color: 'var(--paper)' }}>Platform Analytics</h1>
+          <p style={{ color: 'var(--paper-dim)', margin: 0, fontSize: '15px' }}>High-level metrics and distribution data for Cebu City.</p>
+        </div>
+        <AnalyticsRangeSelect value={range} />
       </div>
 
       {/* High-level Metric Cards */}
