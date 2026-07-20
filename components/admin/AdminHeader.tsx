@@ -1,20 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { Search, Bell } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 export function AdminHeader({ title, adminName, adminInitials }: { title: string, adminName: string, adminInitials: string }) {
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/admin/search?q=${encodeURIComponent(searchQuery.trim())}`)
-    }
-  }
-
   return (
     <header style={{ 
       display: 'flex', 
@@ -34,9 +23,7 @@ export function AdminHeader({ title, adminName, adminInitials }: { title: string
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
         {/* Search Pill */}
-        <form 
-          onSubmit={handleSearch}
-          style={{ 
+        <div style={{ 
           display: 'flex', 
           alignItems: 'center', 
           background: 'rgba(255, 255, 255, 0.05)', 
@@ -50,8 +37,6 @@ export function AdminHeader({ title, adminName, adminInitials }: { title: string
           <input 
             type="text" 
             placeholder="Search families, donors, or ID..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               background: 'transparent',
               border: 'none',
@@ -62,7 +47,7 @@ export function AdminHeader({ title, adminName, adminInitials }: { title: string
               fontFamily: 'var(--font-body)'
             }}
           />
-        </form>
+        </div>
 
         {/* Notifications */}
         <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative', color: 'var(--paper)' }}>
