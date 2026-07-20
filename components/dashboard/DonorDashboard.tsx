@@ -7,12 +7,14 @@ import { getSupabaseService } from '@/lib/supabaseService.client'
 import { Modal } from '@/components/ui/Modal'
 import { DonationForm } from '@/components/forms/DonationForm'
 import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
+import { getDisplayName } from '@/lib/utils/name'
 import type { Donation, Profile } from '@/lib/supabase/types'
 import type { LeaderboardEntry } from '@/lib/supabaseService'
 
 export function DonorDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [donations, setDonations] = useState<Donation[]>([])
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -37,6 +39,7 @@ export function DonorDashboard() {
     }
 
     setUserId(user.id)
+    setUserEmail(user.email ?? null)
 
     // RLS on `donations` should already scope rows to the current donor,
     // but we filter by donor_id explicitly so the query is correct even
@@ -85,7 +88,7 @@ export function DonorDashboard() {
     )
   }
 
-  const displayName = profile?.full_name || 'Donor'
+  const displayName = getDisplayName(profile?.full_name, userEmail, 'Donor')
   const initials = displayName
     .split(' ')
     .map((part) => part[0])

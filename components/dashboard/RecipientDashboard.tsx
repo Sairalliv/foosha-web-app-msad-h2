@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { HelpRequestForm } from '@/components/forms/HelpRequestForm'
 import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
+import { getDisplayName } from '@/lib/utils/name'
 import type { Donation, HelpRequest, PriorityTier, Profile } from '@/lib/supabase/types'
 
 const TIER_LABELS: Record<PriorityTier, string> = {
@@ -34,6 +35,7 @@ const CODE_LENGTH = 6
 export function RecipientDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [requests, setRequests] = useState<HelpRequest[]>([])
   const [nearby, setNearby] = useState<Donation[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -55,6 +57,7 @@ export function RecipientDashboard() {
     }
 
     setUserId(user.id)
+    setUserEmail(user.email ?? null)
 
     const [profileResult, requestsResult] = await Promise.all([
       supabase.from('profiles').select('id, full_name, barangay, avatar_url, role').eq('id', user.id).single(),
@@ -156,7 +159,7 @@ export function RecipientDashboard() {
     )
   }
 
-  const householdName = profile?.full_name || 'Household'
+  const householdName = getDisplayName(profile?.full_name, userEmail, 'Household')
   const initials = householdName
     .split(' ')
     .map((part) => part[0])
