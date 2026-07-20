@@ -507,48 +507,5 @@ export function createSupabaseService(supabase: SupabaseClient) {
       .eq('id', requestId)
     if (error) throw error
   },
-
-  async getSearchResults(query: string): Promise<{ donations: Donation[], requests: HelpRequest[] }> {
-    if (!query || query.trim() === '') {
-      return { donations: [], requests: [] }
-    }
-    
-    const searchPattern = `%${query.trim()}%`
-    
-    // Check if query is a valid UUID
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query.trim())
-    
-    // Search Requests
-    let requestsQuery = supabase
-      .from('requests')
-      .select('*')
-      
-    if (isUuid) {
-      requestsQuery = requestsQuery.eq('id', query.trim())
-    } else {
-      requestsQuery = requestsQuery.or(`requestor_name.ilike.${searchPattern},category.ilike.${searchPattern},description.ilike.${searchPattern},address.ilike.${searchPattern}`)
-    }
-    
-    // Search Donations
-    let donationsQuery = supabase
-      .from('donations')
-      .select('*')
-      
-    if (isUuid) {
-      donationsQuery = donationsQuery.eq('id', query.trim())
-    } else {
-      donationsQuery = donationsQuery.or(`donor_name.ilike.${searchPattern},category.ilike.${searchPattern},description.ilike.${searchPattern},location.ilike.${searchPattern}`)
-    }
-
-    const [reqsRes, donsRes] = await Promise.all([requestsQuery, donationsQuery])
-
-    if (reqsRes.error) console.error('Search requests error:', reqsRes.error)
-    if (donsRes.error) console.error('Search donations error:', donsRes.error)
-
-    return {
-      donations: (donsRes.data || []).map((row: DbDonation) => mapDonation(row, row.donor_name)),
-      requests: (reqsRes.data || []).map((row: DbHelpRequest) => mapRequest(row, row.requestor_name))
-    }
-  },
   }
 }
