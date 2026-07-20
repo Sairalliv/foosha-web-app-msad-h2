@@ -193,50 +193,56 @@ export function createSupabaseService(supabase: SupabaseClient) {
   async getDonations(): Promise<Donation[]> {
     const { data, error } = await supabase
       .from('donations')
-      .select('*, profiles:donor_id ( full_name )')
+      .select('*')
       .order('created_at', { ascending: false })
 
     if (error) throw error
     return (data ?? []).map((row: any) =>
-      mapDonation(row as DbDonation, (row.profiles as Profile | null)?.full_name)
+      mapDonation(row as DbDonation, row.donor_name)
     )
   },
 
   async getRequests(): Promise<HelpRequest[]> {
     const { data, error } = await supabase
       .from('requests')
-      .select('*, profiles:recipient_id ( full_name )')
+      .select('*')
       .order('created_at', { ascending: false })
 
     if (error) throw error
     return (data ?? []).map((row: any) =>
-      mapRequest(row as DbHelpRequest, (row.profiles as Profile | null)?.full_name)
+      mapRequest(row as DbHelpRequest, row.requestor_name)
     )
   },
 
   async getMatchingQueue(): Promise<MatchingQueueItem[]> {
-    const { data, error } = await supabase
+    const { data: matchesData, error: matchesError } = await supabase
       .from('matches')
-      .select(`
-        id,
-        status,
-        donations:donation_id ( type, category, description, amount, profiles:donor_id ( full_name ) ),
-        requests:request_id ( priority_tier, profiles:recipient_id ( full_name ) )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(20)
 
-    if (error) throw error
-    return (data ?? []).map((row: any) => {
-      const donation = row.donations
-      const request = row.requests
+    if (matchesError) throw matchesError
+    if (!matchesData || matchesData.length === 0) return []
+
+    const donationIds = matchesData.map(m => m.donation_id)
+    const requestIds = matchesData.map(m => m.request_id)
+
+    const { data: donationsData } = await supabase.from('donations').select('*').in('id', donationIds)
+    const { data: requestsData } = await supabase.from('requests').select('*').in('id', requestIds)
+
+    const donationsMap = new Map((donationsData || []).map((d: any) => [d.id, d]))
+    const requestsMap = new Map((requestsData || []).map((r: any) => [r.id, r]))
+
+    return matchesData.map(row => {
+      const donation = donationsMap.get(row.donation_id)
+      const request = requestsMap.get(row.request_id)
       const isCash = donation?.type === 'cash'
       const foodItem = donation?.category ? `${donation.category} — ${donation?.description || 'Food donation'}` : donation?.description || 'Food donation'
       return {
         id: row.id,
-        requestor: request?.profiles?.full_name || 'Unknown household',
+        requestor: request?.requestor_name || 'Unknown household',
         priority: request?.priority_tier || 'general',
-        donor: donation?.profiles?.full_name || 'Unknown donor',
+        donor: donation?.donor_name || 'Unknown donor',
         item: isCash ? `₱${donation?.amount ?? 0} Cash Assistance` : foodItem,
         kind: isCash ? 'cash' : 'food',
         status: row.status === 'confirmed' ? 'dispatched' : 'pending',
@@ -245,28 +251,34 @@ export function createSupabaseService(supabase: SupabaseClient) {
   },
 
   async getVerificationFeed(): Promise<VerificationItem[]> {
-    const { data, error } = await supabase
+    const { data: matchesData, error: matchesError } = await supabase
       .from('matches')
-      .select(`
-        id,
-        verification_code,
-        created_at,
-        donations:donation_id ( type, category, description, amount, profiles:donor_id ( full_name ) ),
-        requests:request_id ( profiles:recipient_id ( full_name ) )
-      `)
+      .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(10)
 
-    if (error) throw error
-    return (data ?? []).map((row: any) => {
-      const donation = row.donations
+    if (matchesError) throw matchesError
+    if (!matchesData || matchesData.length === 0) return []
+
+    const donationIds = matchesData.map(m => m.donation_id)
+    const requestIds = matchesData.map(m => m.request_id)
+
+    const { data: donationsData } = await supabase.from('donations').select('*').in('id', donationIds)
+    const { data: requestsData } = await supabase.from('requests').select('*').in('id', requestIds)
+
+    const donationsMap = new Map((donationsData || []).map((d: any) => [d.id, d]))
+    const requestsMap = new Map((requestsData || []).map((r: any) => [r.id, r]))
+
+    return matchesData.map(row => {
+      const donation = donationsMap.get(row.donation_id)
+      const request = requestsMap.get(row.request_id)
       const isCash = donation?.type === 'cash'
       const foodItem = donation?.category ? `${donation.category} — ${donation?.description || 'Food donation'}` : donation?.description || 'Food donation'
       return {
         id: row.id,
-        donor: donation?.profiles?.full_name || 'Unknown donor',
-        recipient: row.requests?.profiles?.full_name || 'Unknown household',
+        donor: donation?.donor_name || 'Unknown donor',
+        recipient: request?.requestor_name || 'Unknown household',
         item: isCash ? `₱${donation?.amount ?? 0} Cash` : foodItem,
         code: row.verification_code,
         time: relativeTime(row.created_at),
@@ -279,7 +291,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
   async getEligibilityReview(): Promise<EligibilityReviewItem[]> {
     const { data, error } = await supabase
       .from('requests')
-      .select('id, priority_tier, verification_status, created_at, profiles:recipient_id ( full_name )')
+      .select('*')
       .in('priority_tier', ['elderly', 'pwd', 'infant'])
       .eq('verification_status', 'pending')
       .order('created_at', { ascending: false })
@@ -287,7 +299,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
     if (error) throw error
     return (data ?? []).map((row: any) => ({
       id: row.id,
-      name: row.profiles?.full_name || 'Unknown household',
+      name: row.requestor_name || 'Unknown household',
       type: TIER_LABELS[row.priority_tier as Priority] || row.priority_tier,
       uploaded: relativeTime(row.created_at),
       status: row.verification_status,
@@ -300,7 +312,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
     // aggregation here since donation volume is modest.)
     const { data, error } = await supabase
       .from('donations')
-      .select('donor_id, amount, type, status, profiles:donor_id ( full_name )')
+      .select('donor_id, amount, type, status, donor_name')
       .eq('status', 'Given')
 
     if (error) throw error
@@ -309,7 +321,7 @@ export function createSupabaseService(supabase: SupabaseClient) {
     for (const row of (data ?? []) as any[]) {
       const amount = row.type === 'cash' ? Number(row.amount ?? 0) : 0
       const key = row.donor_id
-      const name = row.profiles?.full_name || 'Anonymous donor'
+      const name = row.donor_name || 'Anonymous donor'
       const existing = totals.get(key)
       totals.set(key, { name, total: (existing?.total ?? 0) + amount })
     }
@@ -369,11 +381,11 @@ export function createSupabaseService(supabase: SupabaseClient) {
   async getAnalytics(rangeDays: number | null = null): Promise<AnalyticsSummary> {
     const cutoffIso = rangeDays == null ? null : new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString()
 
-    let requestsQuery = supabase.from('requests').select('recipient_id, status, created_at')
-    let donationsQuery = supabase.from('donations').select('type, amount, status, created_at')
+    let requestsQuery = supabase.from('requests').select('id, recipient_id, status, created_at, address')
+    let donationsQuery = supabase.from('donations').select('id, type, amount, status, created_at')
     let matchesQuery = supabase
       .from('matches')
-      .select('status, created_at, requests:request_id ( created_at, address )')
+      .select('status, created_at, request_id, donation_id')
 
     if (cutoffIso) {
       requestsQuery = requestsQuery.gte('created_at', cutoffIso)
@@ -422,8 +434,12 @@ export function createSupabaseService(supabase: SupabaseClient) {
 
     const matchDurationsHours: number[] = []
     const barangayCounts = new Map<string, number>()
+    
+    // Create map of requests for easy lookup
+    const requestsMap = new Map((requestsRes.data ?? []).map((r: any) => [r.id, r]))
+
     for (const m of matches) {
-      const requestRow = m.requests
+      const requestRow = requestsMap.get(m.request_id)
       if (requestRow?.created_at && m.created_at) {
         const hours = (new Date(m.created_at).getTime() - new Date(requestRow.created_at).getTime()) / 3_600_000
         if (Number.isFinite(hours) && hours >= 0) matchDurationsHours.push(hours)

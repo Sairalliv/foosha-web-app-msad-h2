@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseService } from '@/lib/supabaseService.client'
 import type { Donation, HelpRequest, Priority } from '@/lib/supabaseService'
+import { createMatchAction } from '@/actions/admin-actions'
 
 // Lower number = higher priority. "General" is last, per the matching rules.
 const PRIORITY_ORDER: Record<Priority, number> = {
@@ -94,8 +95,7 @@ export function MatchingQueueClient({ initialDonations, initialRequests }: { ini
     if (!selectedDonation || !selectedRequest) return
     setIsMatching(true)
     try {
-      const supabaseService = getSupabaseService()
-      await supabaseService.createMatch(selectedDonation.id, selectedRequest.id)
+      await createMatchAction(selectedDonation.id, selectedRequest.id)
       setSelectedDonation(null)
       setSelectedRequest(null)
       setAutoSkipDonationIds(new Set())

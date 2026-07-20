@@ -390,13 +390,18 @@ function ConfirmPickupModule({ onConfirmed }: { onConfirmed: () => void }) {
     setIsSubmitting(true)
     setError('')
 
-    const supabase = createClient()
-    const { error: rpcError } = await supabase.rpc('confirm_pickup', { p_verification_code: code })
+    let errorMsg = ''
+    try {
+      const { confirmPickupByCodeAction } = await import('@/actions/dashboard-actions')
+      await confirmPickupByCodeAction(code)
+    } catch (e: any) {
+      errorMsg = e.message
+    }
 
     setIsSubmitting(false)
 
-    if (rpcError) {
-      console.error(rpcError)
+    if (errorMsg) {
+      console.error(errorMsg)
       setError('That code is invalid or has already been used. Double-check your ticket and try again.')
       return
     }
