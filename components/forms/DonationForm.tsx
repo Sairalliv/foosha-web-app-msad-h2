@@ -5,6 +5,7 @@ import { Package, Banknote, MapPin, Tag } from 'lucide-react'
 import type { Donation, DonationType } from '@/lib/supabase/types'
 import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
 import { createDonationAction } from '@/actions/donation-actions'
+import { LocationPicker } from '@/components/map/LocationPicker'
 
 interface DonationFormProps {
   /** auth.users.id of the signed-in donor, used to scope the insert */
@@ -210,6 +211,7 @@ export function DonationForm({ donorId: _donorId, onCancel, onCreated }: Donatio
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
+            <LocationPicker onSelect={setLocation} />
           </div>
 
           <div className="form-actions">

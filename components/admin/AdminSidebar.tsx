@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import Image from 'next/image'
 import {
   LayoutDashboard,
   GitMerge,
@@ -44,7 +43,7 @@ export function AdminSidebar({ adminName, adminInitials }: { adminName: string, 
   const pathname = usePathname()
 
   return (
-    <aside className="sidebar" style={{ width: '240px', flexShrink: 0, background: 'var(--bg-deep)', borderRight: '1px solid var(--line)', padding: '26px 20px', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+    <aside className="sidebar">
       <div style={{ marginBottom: 40 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: 'var(--paper)', margin: 0, lineHeight: 1 }}>Foosha</h1>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '1px', color: 'var(--kalamansi)', marginTop: 4 }}>

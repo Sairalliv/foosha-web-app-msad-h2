@@ -8,6 +8,7 @@ export function VerificationClient({
   initialFeed,
   initialEligibilityReview,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialFeed: any[]
   initialEligibilityReview: EligibilityReviewItem[]
 }) {
@@ -65,6 +66,7 @@ export function VerificationClient({
             <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: 'var(--paper)' }}>OTP Pickup Verification List</h3>
           </div>
           
+          <div className="table-responsive-wrapper">
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--paper-dim)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -91,6 +93,7 @@ export function VerificationClient({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </section>
 
@@ -111,7 +114,7 @@ export function VerificationClient({
             {eligibility.map(doc => {
               const isBusy = pendingId && busyId === doc.id
               return (
-                <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.15)', padding: '20px', borderRadius: '8px', border: '1px solid var(--line)' }}>
+                <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', background: 'rgba(0,0,0,0.15)', padding: '20px', borderRadius: '8px', border: '1px solid var(--line)' }}>
                   <div style={{ display: 'flex', gap: '20px' }}>
                     <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--paper-dim)' }}>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>

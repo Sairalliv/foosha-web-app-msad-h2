@@ -9,6 +9,7 @@ interface RecordItem {
   status: string
   neighborhood: string
   date: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
 
@@ -45,10 +46,10 @@ export function RecordsTableClient({ title, type, initialData }: { title: string
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', margin: '0', color: 'var(--paper)' }}>{title}</h1>
       
       <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           
           {/* Filters */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {filters.map(f => (
               <button 
                 key={f}
@@ -82,56 +83,61 @@ export function RecordsTableClient({ title, type, initialData }: { title: string
               padding: '8px 16px',
               borderRadius: '99px',
               fontSize: '13px',
-              width: '250px'
+              width: '100%',
+              maxWidth: '250px',
+              minWidth: '160px',
+              flex: '1 1 auto'
             }}
           />
         </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
-          <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--paper-dim)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              <th style={{ padding: '16px 24px', fontWeight: 500 }}>ID</th>
-              <th style={{ padding: '16px 24px', fontWeight: 500 }}>{type === 'donations' ? 'Donor' : 'Requestor'}</th>
-              <th style={{ padding: '16px 24px', fontWeight: 500 }}>{type === 'donations' ? 'Item' : 'Need'}</th>
-              <th style={{ padding: '16px 24px', fontWeight: 500 }}>Neighborhood</th>
-              <th style={{ padding: '16px 24px', fontWeight: 500 }}>Date</th>
-              <th style={{ padding: '16px 24px', fontWeight: 500 }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((row) => (
-              <tr key={row.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                <td style={{ padding: '16px 24px', color: 'var(--paper-dim)' }}>{row.id}</td>
-                <td style={{ padding: '16px 24px', fontWeight: 500, color: 'var(--paper)' }}>
-                  {type === 'donations' ? row.donor : row.requestor}
-                </td>
-                <td style={{ padding: '16px 24px', color: 'var(--paper)' }}>
-                  {type === 'donations' ? row.item : row.need}
-                </td>
-                <td style={{ padding: '16px 24px', color: 'var(--paper-dim)' }}>{row.neighborhood}</td>
-                <td style={{ padding: '16px 24px', color: 'var(--paper-dim)' }}>{row.date}</td>
-                <td style={{ padding: '16px 24px' }}>
-                  <span style={{ 
-                    display: 'inline-flex', 
-                    padding: '4px 10px', 
-                    borderRadius: '99px', 
-                    fontSize: '12px', 
-                    background: (row.status === 'Available' || row.status === 'Pending') ? 'rgba(245, 158, 11, 0.15)' : 'rgba(143, 184, 168, 0.15)',
-                    color: (row.status === 'Available' || row.status === 'Pending') ? '#fbbf24' : 'var(--teal)',
-                    fontWeight: 500
-                  }}>
-                    {row.status}
-                  </span>
-                </td>
+        <div className="table-responsive-wrapper">
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--paper-dim)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <th style={{ padding: '16px 24px', fontWeight: 500 }}>ID</th>
+                <th style={{ padding: '16px 24px', fontWeight: 500 }}>{type === 'donations' ? 'Donor' : 'Requestor'}</th>
+                <th style={{ padding: '16px 24px', fontWeight: 500 }}>{type === 'donations' ? 'Item' : 'Need'}</th>
+                <th style={{ padding: '16px 24px', fontWeight: 500 }}>Neighborhood</th>
+                <th style={{ padding: '16px 24px', fontWeight: 500 }}>Date</th>
+                <th style={{ padding: '16px 24px', fontWeight: 500 }}>Status</th>
               </tr>
-            ))}
-            {filteredData.length === 0 && (
-              <tr>
-                <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: 'var(--paper-dim)' }}>No records found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredData.map((row) => (
+                <tr key={row.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                  <td style={{ padding: '16px 24px', color: 'var(--paper-dim)' }}>{row.id}</td>
+                  <td style={{ padding: '16px 24px', fontWeight: 500, color: 'var(--paper)' }}>
+                    {type === 'donations' ? row.donor : row.requestor}
+                  </td>
+                  <td style={{ padding: '16px 24px', color: 'var(--paper)' }}>
+                    {type === 'donations' ? row.item : row.need}
+                  </td>
+                  <td style={{ padding: '16px 24px', color: 'var(--paper-dim)' }}>{row.neighborhood}</td>
+                  <td style={{ padding: '16px 24px', color: 'var(--paper-dim)' }}>{row.date}</td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <span style={{ 
+                      display: 'inline-flex', 
+                      padding: '4px 10px', 
+                      borderRadius: '99px', 
+                      fontSize: '12px', 
+                      background: (row.status === 'Available' || row.status === 'Pending') ? 'rgba(245, 158, 11, 0.15)' : 'rgba(143, 184, 168, 0.15)',
+                      color: (row.status === 'Available' || row.status === 'Pending') ? '#fbbf24' : 'var(--teal)',
+                      fontWeight: 500
+                    }}>
+                      {row.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {filteredData.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: 'var(--paper-dim)' }}>No records found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

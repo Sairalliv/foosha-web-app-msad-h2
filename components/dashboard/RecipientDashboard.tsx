@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck, Tag } from 'lucide-react'
+import { Package, Banknote, MapPin, Calendar, PlusCircle, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 import { HelpRequestForm } from '@/components/forms/HelpRequestForm'
@@ -252,7 +252,7 @@ export function RecipientDashboard() {
                   <div className="meta" style={{ display: 'flex', gap: '14px', marginTop: '4px' }}>
                     {r.type === 'food' && (r.category || r.amount != null) && (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Tag size={12} />
+                        {/* Removed icon to match edit request */}
                         {r.category}
                         {r.category && r.amount != null ? ' · ' : ''}
                         {r.amount != null ? `Qty ${r.amount}` : ''}
@@ -291,17 +291,7 @@ export function RecipientDashboard() {
                   <div className="listing-top">
                     <div>
                       <div className="name">{d.type === 'cash' ? `₱${(d.amount ?? 0).toLocaleString()} cash pledge` : d.description}</div>
-                      <div className="from">
-                        {d.location}
-                        {d.type === 'food' && (d.category || d.amount != null) && (
-                          <>
-                            {' · '}
-                            {d.category}
-                            {d.category && d.amount != null ? ' · ' : ''}
-                            {d.amount != null ? `Qty ${d.amount}` : ''}
-                          </>
-                        )}
-                      </div>
+                      <div className="from">{d.location}</div>
                     </div>
                     <span className={`kind-badge ${d.type}`}>{d.type}</span>
                   </div>

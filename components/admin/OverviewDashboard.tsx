@@ -105,7 +105,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
       </div>
 
       {/* Top Row Statistics Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+      <div className="stat-row" style={{ display: 'grid', gap: '24px' }}>
         {/* Card 1: Total Active Requests */}
         <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--line)', borderRadius: '12px', padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <h4 style={{ fontSize: '14px', color: 'var(--paper-dim)', fontWeight: 500, margin: '0 0 16px 0' }}>Total Active Requests</h4>
@@ -198,7 +198,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
         withTopMargin={false}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      <div className="grid-2" style={{ display: 'grid', gap: '24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Priority Matching Queue Table */}
           <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
@@ -208,6 +208,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                 View all <ChevronRight size={14} />
               </Link>
             </div>
+            <div className="table-responsive-wrapper">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
               <thead>
                 <tr style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--paper-dim)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -260,6 +261,7 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* OTP Security Verification Panel */}

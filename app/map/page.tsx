@@ -1,5 +1,6 @@
 import { getDonationLocations } from '@/lib/services/locations'
 import MapPageClient from '@/components/map/MapPageClient'
+import BackToDashboard from '@/components/map/BackToDashboard'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -13,8 +14,10 @@ export default async function MapPage() {
   const locations = await getDonationLocations()
 
   return (
-    <main className="w-full h-[calc(100vh-64px)] overflow-hidden">
-      <MapPageClient initialLocations={locations} />
+    <main className="fullscreen-map-container">
+      <BackToDashboard />
+      <MapPageClient initialLocations={locations} isFullScreen />
     </main>
   )
 }
+

@@ -32,6 +32,8 @@ interface DonationMapProps {
   locations: DonationLocation[]
   selectedCategory: string | null
   searchQuery: string
+  isFullScreen?: boolean
+  initialCenter?: [number, number]
   /** CSS height for the map container. Defaults to the full-page map height. */
   height?: string
   /** Initial/default zoom level used when there's no single-result focus. */
@@ -49,24 +51,27 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
   return null
 }
 
-export default function DonationMap({
-  locations,
-  selectedCategory,
-  searchQuery,
-  height = 'calc(100vh - 64px)',
+export default function DonationMap({ 
+  locations, 
+  selectedCategory, 
+  searchQuery, 
+  isFullScreen = false, 
+  initialCenter, 
+  height,
   defaultZoom = 11,
-  scrollWheelZoom = true,
+  scrollWheelZoom = true
 }: DonationMapProps) {
   const [mounted, setMounted] = useState(false)
-  const defaultCenter: [number, number] = [10.3157, 123.8854] // Cebu City
+  const defaultCenter: [number, number] = initialCenter ?? [10.3157, 123.8854] // Cebu City
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 
   if (!mounted) {
     return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center animate-pulse" style={{ height }}>
+      <div className={`w-full h-full bg-gray-100 flex items-center justify-center animate-pulse ${isFullScreen ? 'h-screen' : ''}`} style={!isFullScreen && height ? { height } : undefined}>
         <p className="text-gray-500 font-medium">Loading Map...</p>
       </div>
     )
@@ -90,7 +95,7 @@ export default function DonationMap({
     : defaultCenter
 
   return (
-    <div className="w-full relative z-0" style={{ height }}>
+    <div className={`w-full relative z-0 ${isFullScreen ? 'h-screen' : (height ? '' : 'h-[calc(100vh-64px)]')}`} style={!isFullScreen && height ? { height } : undefined}>
       <MapContainer 
         center={defaultCenter} 
         zoom={defaultZoom} 
@@ -128,7 +133,7 @@ export default function DonationMap({
 
                   <div className="space-y-2 mt-3">
                     {location.description && (
-                      <p className="text-sm text-gray-600 italic leading-snug m-0">"{location.description}"</p>
+                      <p className="text-sm text-gray-600 italic leading-snug m-0">&quot;{location.description}&quot;</p>
                     )}
                     
                     <div className="flex items-start gap-2">

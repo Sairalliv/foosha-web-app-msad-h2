@@ -5,6 +5,7 @@ import { Package, Banknote, HandHeart, CircleUserRound, Accessibility, Baby, Che
 import { createClient } from '@/lib/supabase/client'
 import type { HelpRequest, PriorityTier, RequestType } from '@/lib/supabase/types'
 import { FOOD_CATEGORIES } from '@/lib/constants/foodCategories'
+import { LocationPicker } from '@/components/map/LocationPicker'
 
 interface HelpRequestFormProps {
   /** auth.users.id of the signed-in recipient, used to scope the insert */
@@ -272,6 +273,7 @@ export function HelpRequestForm({ recipientId, onCancel, onCreated }: HelpReques
                 onChange={(e) => setAddress(e.target.value)}
               />
             </div>
+            <LocationPicker onSelect={setAddress} />
           </div>
 
           <div className="form-actions">
