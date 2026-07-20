@@ -15,7 +15,7 @@ export default async function LandingPage() {
     <div>
       <LandingNav />
 
-      <section className="hero wrap flex flex-col lg:grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-14 pt-12 lg:pt-20">
+      <section className="hero wrap flex flex-col lg:grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-14 pt-20 sm:pt-24 lg:pt-28">
         <div>
           <div className="eyebrow">Cebu City Food Assistance Network</div>
           <h1>
@@ -144,36 +144,32 @@ export default async function LandingPage() {
       </section>
 
       <section id="leaderboard" className="landing wrap py-12 lg:py-20">
-        <div className="section-head" style={{ marginBottom: 40, margin: "0 auto 48px", textAlign: "center" }}>
+        <div className="section-head" style={{ margin: "0 auto clamp(2.5rem, 5vw, 3.5rem)", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>
             Cebu City · Top donors
           </div>
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
 
-        <div className="public-leaderboard bg-[var(--paper)] text-[var(--ink)] rounded-xl p-6 lg:p-10 max-w-[800px] mx-auto shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
-          <div className="lb-header hidden sm:grid grid-cols-[50px_1fr_120px] lg:grid-cols-[60px_1fr_140px] gap-4 text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-4">
+        <div className="public-leaderboard bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 max-w-[800px] mx-auto shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
+          <div className="lb-header hidden sm:grid grid-cols-[minmax(3.5rem,0.45fr)_minmax(0,1fr)_minmax(7.5rem,0.65fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
             <div>Rank</div>
             <div>Donor</div>
             <div style={{ textAlign: "right" }}>Lifetime Given</div>
           </div>
 
           {leaderboard.length === 0 ? (
-            <p className="sub" style={{ textAlign: "center", padding: "24px 0" }}>
+            <p className="sub col-span-3 w-full py-6 text-center" style={{ margin: 0 }}>
               No confirmed cash donations yet — be the first name on this list.
             </p>
           ) : (
             leaderboard.map((entry) => (
-              <div key={entry.rank} className={`lb-row flex flex-col sm:grid sm:grid-cols-[50px_1fr_120px] lg:grid-cols-[60px_1fr_140px] gap-2 sm:gap-4 items-start sm:items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
-                <div className="flex items-center gap-4 sm:contents">
-                  <div className="rank-num text-xl sm:text-2xl font-black text-[var(--ink-soft)]">{entry.rank}</div>
-                  <div className="sm:hidden font-semibold text-base text-[var(--ink)]">{entry.name}</div>
-                  <div className="sm:hidden font-mono text-sm font-semibold text-[var(--bg-deep)] ml-auto">{entry.amount}</div>
-                </div>
-                <div>
-                  <div className="name hidden sm:block font-semibold text-base">{entry.name}</div>
+              <div key={entry.rank} className={`lb-row grid grid-cols-[2.75rem_minmax(0,1fr)_auto] sm:grid-cols-[minmax(3.5rem,0.45fr)_minmax(0,1fr)_minmax(7.5rem,0.65fr)] gap-x-3 sm:gap-x-4 lg:gap-x-6 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
+                <div className="rank-num justify-self-center text-xl sm:text-2xl font-black text-[var(--ink-soft)]">{entry.rank}</div>
+                <div className="min-w-0 text-center">
+                  <div className="name font-semibold text-sm sm:text-base">{entry.name}</div>
                   {entry.badges.length > 0 && (
-                    <div className="badges flex flex-wrap gap-2 mt-1 sm:mt-2">
+                    <div className="badges flex flex-wrap justify-center gap-2 mt-1 sm:mt-2">
                       {entry.badges.map((badge) => (
                         <span key={badge} className={`badge-pill font-mono text-[10px] px-2 py-1 rounded-full ${badge === "bayani" ? "bg-[rgba(232,84,47,0.2)] text-[var(--jeepney-dark)] font-semibold" : "bg-[rgba(199,217,77,0.3)] text-[var(--bg-deep)] font-semibold"}`}>
                           {badge === "bayani" ? "Bayani ng Barangay" : "First Harvest"}
@@ -182,7 +178,7 @@ export default async function LandingPage() {
                     </div>
                   )}
                 </div>
-                <div className="amount hidden sm:block font-mono text-[15px] font-semibold text-right text-[var(--bg-deep)]">{entry.amount}</div>
+                <div className="amount justify-self-end whitespace-nowrap font-mono text-xs sm:text-[15px] font-semibold text-right text-[var(--bg-deep)]">{entry.amount}</div>
               </div>
             ))
           )}

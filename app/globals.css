@@ -468,7 +468,7 @@ tr:hover{background:rgba(244,236,216,0.02);}
 .delivery-legend-dot{width:10px; height:10px; border-radius:3px; flex-shrink:0;}
 
 /* ── Public / marketing pages ──────────────────────────────────── */
-.wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
+.wrap{max-width:1180px; margin:0 auto; padding-inline:clamp(1.25rem, 4vw, 2rem);}
 header.site{position:sticky; top:0; z-index:50; background:rgba(19,36,32,0.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
 nav.site{display:flex; align-items:center; justify-content:space-between; padding:18px 32px; max-width:1180px; margin:0 auto;}
 .navlinks{display:flex; gap:36px; font-size:14px; font-weight:500;}
@@ -484,7 +484,7 @@ nav.site{display:flex; align-items:center; justify-content:space-between; paddin
 .hero .sub{font-size:18px; max-width:480px; margin-bottom:36px;}
 .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
 
-section.landing{position:relative; z-index:1; padding:72px 0; scroll-margin-top:80px;}
+section.landing{position:relative; z-index:1; padding-block:clamp(4.5rem, 8vw, 6rem); scroll-margin-top:80px;}
 .section-head{max-width:620px; margin-bottom:48px;}
 .section-head .eyebrow{color:var(--jeepney);}
 
@@ -508,7 +508,7 @@ section.landing{position:relative; z-index:1; padding:72px 0; scroll-margin-top:
 .flow-text h4{font-size:16px; font-weight:600; margin-bottom:4px;}
 .flow-text p{font-size:14px; color:var(--paper-dim);}
 
-.cta-band{text-align:center; padding:90px 0; position:relative; z-index:1;}
+.cta-band{text-align:center; padding-block:clamp(5rem, 10vw, 7.5rem); position:relative; z-index:1;}
 .cta-band h2{max-width:560px; margin:0 auto 28px;}
 footer.site{border-top:1px solid var(--line); padding:40px 0; position:relative; z-index:1;}
 .foot-wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
