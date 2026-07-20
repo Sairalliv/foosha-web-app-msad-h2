@@ -21,9 +21,6 @@ const STORAGE_KEY = 'foosha-sidebar-collapsed'
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Donation Map', href: '/map', icon: Map },
-  { label: 'My Donations', href: '/donor', icon: Gift },
-  { label: 'Profile', href: '/dashboard/profile', icon: User },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
 interface DashboardSidebarProps {

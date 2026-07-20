@@ -207,7 +207,7 @@ export function DonorDashboard() {
               No donations yet. Thank you for considering helping out!
             </div>
           ) : (
-            <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+            <div className="panel" style={{ padding: 0, overflowX: 'auto' }}>
               <table>
                 <thead>
                   <tr>

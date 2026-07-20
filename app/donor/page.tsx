@@ -12,7 +12,7 @@ export default async function DonorPage() {
   await requireUser()
 
   return (
-    <main style={{ maxWidth: '1180px', margin: '0 auto', padding: '36px 44px' }}>
+    <main style={{ padding: '36px 44px' }}>
       <DonorDashboard />
     </main>
   )
