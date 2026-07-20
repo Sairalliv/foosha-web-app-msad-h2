@@ -142,8 +142,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="leaderboard" className="landing leaderboard-section wrap py-12 lg:py-20">
-        <div className="w-full max-w-[900px] mx-auto">
+      <section id="leaderboard" className="landing wrap py-12 lg:py-20">
         <div className="section-head" style={{ margin: "0 auto clamp(2.5rem, 5vw, 3.5rem)", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>
             Cebu City · Top donors
@@ -182,7 +181,6 @@ export default async function LandingPage() {
               </div>
             ))
           )}
-        </div>
         </div>
       </section>
 
