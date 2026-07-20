@@ -103,6 +103,9 @@ export function RegisterForm() {
       {/* Right form panel */}
       <div className="auth-form-side">
         <div className="auth-form-wrap">
+          <Link href="/" className="auth-back-link">
+            ← Back to Landing Page
+          </Link>
           <div className="eyebrow">Join the network</div>
           <h1>Create your account</h1>
           <p className="sub">Start giving or receiving food assistance in Cebu City.</p>

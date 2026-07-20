@@ -1,9 +1,8 @@
 import { requireUserProfile } from '@/lib/auth/guards'
-import { logoutAction } from '@/actions/auth-actions'
-import Link from 'next/link'
-import Image from 'next/image'
 import { DonorDashboard } from '@/components/dashboard/DonorDashboard'
 import { RecipientDashboard } from '@/components/dashboard/RecipientDashboard'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Dashboard - Foosha',
@@ -30,39 +29,13 @@ export default async function DashboardPage({
 
   return (
     <div className="app">
-      <aside className="sidebar">
-        <Image
-          className="logo-mark"
-          src="/assets/foosha-logo.png"
-          alt="Foosha"
-          width={712}
-          height={201}
-        />
-
-        <div className="nav-group">
-          <div className="nav-label">Menu</div>
-          <Link href="/dashboard" className="nav-item active">
-            <span>◆ Dashboard</span>
-          </Link>
-          {effectiveRole === 'admin' && (
-            <Link href="/admin" className="nav-item">
-              <span>◆ Admin Portal</span>
-            </Link>
-          )}
-        </div>
-
-        <div className="sidebar-foot">
-          <form action={logoutAction}>
-            <button type="submit" className="mini-profile" style={{ width: '100%' }}>
-              <div className="avatar">{initials || 'U'}</div>
-              <div>
-                <div className="who">{displayName}</div>
-                <div className="role">{effectiveRole} · Log out</div>
-              </div>
-            </button>
-          </form>
-        </div>
-      </aside>
+      <DashboardSidebar
+        displayName={displayName}
+        initials={initials}
+        role={effectiveRole as string}
+        avatarUrl={profile?.avatar_url}
+        showAdminLink={effectiveRole === 'admin'}
+      />
 
       <main>
         {effectiveRole === 'donor' && <DonorDashboard />}
@@ -102,3 +75,4 @@ export default async function DashboardPage({
     </div>
   )
 }
+

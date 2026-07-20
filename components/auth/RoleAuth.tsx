@@ -50,6 +50,9 @@ export function RoleAuth() {
   return (
     <div className={styles.container}>
       <div className={styles.authCard}>
+        <Link href="/" className="auth-back-link">
+          ← Back to Landing Page
+        </Link>
         <div className={styles.header}>
           <Image
             src="/assets/foosha-logo.png"
