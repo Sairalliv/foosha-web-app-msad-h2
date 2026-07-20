@@ -27,6 +27,7 @@ export interface Profile {
 export interface Donation {
   id: string
   donor_id: string // FK -> profiles.id / auth.users.id
+  donor_name?: string | null // Available directly on the table now
   type: DonationType
   category: string | null // food category, e.g. "Rice & Grains"; used when type === 'food'
   description: string | null // used when type === 'food'
@@ -55,6 +56,7 @@ export type MatchStatus = 'pending' | 'confirmed'
 export interface HelpRequest {
   id: string
   recipient_id: string // FK -> profiles.id / auth.users.id
+  requestor_name?: string | null // Available directly on the table now
   type: RequestType
   category: string | null // food category, e.g. "Rice & Grains"; used when type === 'food'
   description: string | null // used when type === 'food'
