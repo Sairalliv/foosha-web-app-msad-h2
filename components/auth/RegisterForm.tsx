@@ -17,7 +17,6 @@ type Role = 'donor' | 'recipient' | 'admin'
 const ROLES: { key: Role; name: string; desc: string; icon: string }[] = [
   { key: 'donor', name: 'Donor', desc: 'Give food or cash', icon: '🎁' },
   { key: 'recipient', name: 'Recipient', desc: 'Request assistance', icon: '🏠' },
-  { key: 'admin', name: 'City Admin', desc: 'Oversee the network', icon: '🏛️' },
 ]
 
 export function RegisterForm() {
