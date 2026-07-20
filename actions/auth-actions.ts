@@ -48,6 +48,7 @@ export async function registerAction(formData: FormData) {
         full_name: fullName,
         role: role,
       },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
     },
   })
 
@@ -64,11 +65,10 @@ export async function registerAction(formData: FormData) {
     return { error: errorMessage }
   }
 
-  // Usually users need to confirm their email depending on Supabase settings.
-  // For this example, we'll redirect them to dashboard (if auto-confirm is enabled)
-  // or they'll be asked to check their email.
+  // Redirect the user to the verification notice page
+  // so they know to check their email before logging in.
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  redirect('/verify-email')
 }
 
 export async function logoutAction() {
