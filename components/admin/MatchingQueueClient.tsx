@@ -23,6 +23,11 @@ const PRIORITY_ORDER: Record<Priority, number> = {
  *   4/5. Only items present in the pools passed in are considered (callers are
  *        responsible for excluding already-matched or already-suggested items)
  */
+function getCategory(text: string): string {
+  if (!text) return ''
+  return text.split(' — ')[0].trim()
+}
+
 function findBestPair(
   donations: Donation[],
   requests: HelpRequest[]
@@ -35,9 +40,20 @@ function findBestPair(
   })
 
   for (const request of sortedRequests) {
-    const eligibleDonations = donations
+    const reqCategory = getCategory(request.need)
+    
+    let eligibleDonations = donations
       .filter((d) => d.type === request.type)
-      .sort((a, b) => a.date.localeCompare(b.date)) // oldest donation first
+      
+    // If it's food, try to match the exact category first
+    if (request.type === 'food' && reqCategory) {
+      const exactMatches = eligibleDonations.filter(d => getCategory(d.item) === reqCategory)
+      if (exactMatches.length > 0) {
+        eligibleDonations = exactMatches
+      }
+    }
+      
+    eligibleDonations.sort((a, b) => a.date.localeCompare(b.date)) // oldest donation first
 
     if (eligibleDonations.length > 0) {
       return { donation: eligibleDonations[0], request }
