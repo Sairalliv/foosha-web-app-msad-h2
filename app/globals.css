@@ -485,6 +485,7 @@ nav.site{display:flex; align-items:center; justify-content:space-between; paddin
 .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
 
 section.landing{position:relative; z-index:1; padding-block:clamp(4.5rem, 8vw, 6rem); scroll-margin-top:80px;}
+.landing.leaderboard-section{padding-bottom:clamp(3.5rem, 6vw, 4.5rem);}
 .section-head{max-width:620px; margin-bottom:48px;}
 .section-head .eyebrow{color:var(--jeepney);}
 

@@ -58,8 +58,8 @@ export default function LandingNav() {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
-          <div className="relative w-64 max-w-full h-full bg-[var(--bg-deep)] border-l border-[var(--line)] shadow-2xl flex flex-col p-6 overflow-y-auto z-[61] animate-in slide-in-from-right duration-300">
-            <div className="absolute inset-x-6 top-6 flex items-center justify-between">
+          <div className="relative h-full w-[82vw] max-w-[22rem] bg-[var(--bg-deep)] border-l border-[var(--line)] shadow-2xl flex flex-col p-6 overflow-y-auto z-[61] animate-in slide-in-from-right duration-300">
+            <div className="flex shrink-0 items-center justify-between">
               <span className="font-mono text-xs tracking-widest text-[var(--kalamansi)] uppercase">Menu</span>
               <button 
                 className="p-2 text-[var(--paper-dim)] hover:text-[var(--paper)] hover:bg-[rgba(244,236,216,0.05)] rounded-md transition-colors"
@@ -73,19 +73,19 @@ export default function LandingNav() {
               </button>
             </div>
             
-            <div className="flex flex-1 flex-col justify-center">
-              <div className="flex w-full flex-col gap-5 text-base font-medium">
+            <nav className="flex flex-1 items-center py-6" aria-label="Mobile navigation">
+              <div className="flex w-full flex-col gap-5 text-left text-base font-medium">
                 <Link href="/" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">Home</Link>
                 <a href="#how-it-works" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">How it works</a>
                 <a href="#trust-codes" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">Trust &amp; codes</a>
                 <a href="#leaderboard" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">Leaderboard</a>
                 <Link href="/map" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">Donation Map</Link>
-
-                <div className="flex flex-col gap-5 border-t border-[var(--line)] pt-5">
-                  <Link href="/login" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">Login</Link>
-                  <Link href="/register" onClick={() => setIsOpen(false)} className="btn btn-primary w-fit self-start text-center justify-center">Sign up</Link>
-                </div>
               </div>
+            </nav>
+
+            <div className="flex shrink-0 flex-col gap-5 border-t border-[var(--line)] pt-5 text-left text-base font-medium">
+              <Link href="/login" onClick={() => setIsOpen(false)} className="hover:text-[var(--kalamansi)] transition-colors">Login</Link>
+              <Link href="/register" onClick={() => setIsOpen(false)} className="btn btn-primary w-fit self-start text-center justify-center">Sign up</Link>
             </div>
           </div>
         </div>

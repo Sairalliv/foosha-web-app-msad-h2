@@ -142,7 +142,8 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="leaderboard" className="landing wrap py-12 lg:py-20">
+      <section id="leaderboard" className="landing leaderboard-section wrap py-12 lg:py-20">
+        <div className="w-full max-w-[900px] mx-auto">
         <div className="section-head" style={{ margin: "0 auto clamp(2.5rem, 5vw, 3.5rem)", textAlign: "center" }}>
           <div className="eyebrow" style={{ justifyContent: "center", color: "var(--kalamansi)" }}>
             Cebu City · Top donors
@@ -150,7 +151,7 @@ export default async function LandingPage() {
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
 
-        <div className="public-leaderboard w-full max-w-[960px] mx-auto bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
+        <div className="public-leaderboard w-full bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
           <div className="lb-header hidden sm:grid grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)_minmax(8rem,0.65fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
             <div>Rank</div>
             <div>Donor</div>
@@ -181,6 +182,7 @@ export default async function LandingPage() {
               </div>
             ))
           )}
+        </div>
         </div>
       </section>
 
