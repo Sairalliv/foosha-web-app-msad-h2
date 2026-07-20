@@ -150,29 +150,26 @@ export default async function LandingPage() {
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
 
-        <div className="public-leaderboard mx-auto w-full max-w-2xl bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-8 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
-          <div className="lb-header grid grid-cols-[2.5rem_minmax(0,1fr)] sm:grid-cols-[2.75rem_minmax(0,1fr)] gap-x-3 sm:gap-x-5 text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-3 mb-1">
+        <div className="public-leaderboard w-full bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
+          <div className="lb-header hidden sm:grid grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
             <div>Rank</div>
             <div>Donor</div>
           </div>
 
           {leaderboard.length === 0 ? (
-            <p className="sub w-full py-6 text-center" style={{ margin: 0 }}>
+            <p className="sub col-span-3 w-full py-6 text-center" style={{ margin: 0 }}>
               No confirmed cash donations yet — be the first name on this list.
             </p>
           ) : (
             leaderboard.map((entry) => (
-              <div
-                key={entry.rank}
-                className={`lb-row grid grid-cols-[2.5rem_minmax(0,1fr)] sm:grid-cols-[2.75rem_minmax(0,1fr)] gap-x-3 sm:gap-x-5 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""} ${entry.rank <= 3 ? `rank-${entry.rank}` : ""}`}
-              >
-                <div className="rank-num justify-self-start">{entry.rank}</div>
-                <div className="min-w-0">
-                  <div className="name">{entry.name}</div>
+              <div key={entry.rank} className={`lb-row grid grid-cols-[2.75rem_minmax(0,1fr)] sm:grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)] gap-x-3 sm:gap-x-4 lg:gap-x-6 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
+                <div className="rank-num justify-self-center text-xl sm:text-2xl font-black text-[var(--ink-soft)]">{entry.rank}</div>
+                <div className="min-w-0 text-center">
+                  <div className="name font-semibold text-sm sm:text-base">{entry.name}</div>
                   {entry.badges.length > 0 && (
-                    <div className="badges flex flex-wrap gap-2 mt-1.5">
+                    <div className="badges flex flex-wrap justify-center gap-2 mt-1 sm:mt-2">
                       {entry.badges.map((badge) => (
-                        <span key={badge} className={`badge-pill font-mono ${badge}`}>
+                        <span key={badge} className={`badge-pill font-mono text-[10px] px-2 py-1 rounded-full ${badge === "bayani" ? "bg-[rgba(232,84,47,0.2)] text-[var(--jeepney-dark)] font-semibold" : "bg-[rgba(199,217,77,0.3)] text-[var(--bg-deep)] font-semibold"}`}>
                           {badge === "bayani" ? "Bayani ng Barangay" : "First Harvest"}
                         </span>
                       ))}
