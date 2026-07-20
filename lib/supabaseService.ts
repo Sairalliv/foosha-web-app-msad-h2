@@ -381,11 +381,11 @@ export function createSupabaseService(supabase: SupabaseClient) {
   async getAnalytics(rangeDays: number | null = null): Promise<AnalyticsSummary> {
     const cutoffIso = rangeDays == null ? null : new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString()
 
-    let requestsQuery = supabase.from('requests').select('recipient_id, status, created_at')
-    let donationsQuery = supabase.from('donations').select('type, amount, status, created_at')
+    let requestsQuery = supabase.from('requests').select('id, recipient_id, status, created_at, address')
+    let donationsQuery = supabase.from('donations').select('id, type, amount, status, created_at')
     let matchesQuery = supabase
       .from('matches')
-      .select('status, created_at, requests:request_id ( created_at, address )')
+      .select('status, created_at, request_id, donation_id')
 
     if (cutoffIso) {
       requestsQuery = requestsQuery.gte('created_at', cutoffIso)
@@ -434,8 +434,12 @@ export function createSupabaseService(supabase: SupabaseClient) {
 
     const matchDurationsHours: number[] = []
     const barangayCounts = new Map<string, number>()
+    
+    // Create map of requests for easy lookup
+    const requestsMap = new Map((requestsRes.data ?? []).map((r: any) => [r.id, r]))
+
     for (const m of matches) {
-      const requestRow = m.requests
+      const requestRow = requestsMap.get(m.request_id)
       if (requestRow?.created_at && m.created_at) {
         const hours = (new Date(m.created_at).getTime() - new Date(requestRow.created_at).getTime()) / 3_600_000
         if (Number.isFinite(hours) && hours >= 0) matchDurationsHours.push(hours)

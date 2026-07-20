@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import { getSupabaseService } from '@/lib/supabaseService.client'
 import type { EligibilityReviewItem } from '@/lib/supabaseService'
+import { approveEligibilityAction, requestMoreInfoAction } from '@/actions/admin-actions'
 
 export function VerificationClient({
   initialFeed,
@@ -21,8 +22,7 @@ export function VerificationClient({
     setBusyId(id)
     startTransition(async () => {
       try {
-        const supabaseService = getSupabaseService()
-        await supabaseService.approveEligibility(id)
+        await approveEligibilityAction(id)
         setEligibility((prev) => prev.filter((item) => item.id !== id))
       } catch (e) {
         console.error(e)
@@ -37,8 +37,7 @@ export function VerificationClient({
     setBusyId(id)
     startTransition(async () => {
       try {
-        const supabaseService = getSupabaseService()
-        await supabaseService.requestMoreInfo(id)
+        await requestMoreInfoAction(id)
         setEligibility((prev) =>
           prev.map((item) => (item.id === id ? { ...item, status: 'needs_info' } : item))
         )
