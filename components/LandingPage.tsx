@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import LandingNav from "./LandingNav";
 import { getSupabaseService } from "@/lib/supabaseService.server";
 import type { LeaderboardEntry } from "@/lib/supabaseService";
@@ -34,7 +33,7 @@ export default async function LandingPage() {
           </div>
         </div>
 
-        <div className="ticket" style={{ transform: "rotate(2.5deg)", maxWidth: 340, marginLeft: "auto" }}>
+        <div className="ticket self-center lg:justify-self-end" style={{ transform: "rotate(2.5deg)", maxWidth: 340 }}>
           <div className="ticket-top">
             <div>
               <div className="ticket-label">Match ticket</div>
@@ -95,8 +94,8 @@ export default async function LandingPage() {
             Every match gets a one-time code, like an OTP. No fake deliveries, no stolen donations.
           </p>
         </div>
-        <div className="trust-wrap grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-[var(--bg-deep)] border border-[var(--line)] rounded-2xl p-8 lg:p-14">
-          <div className="flow">
+        <div className="trust-wrap grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center bg-[var(--bg-deep)] border border-[var(--line)] rounded-2xl p-8 lg:p-14">
+          <div className="flow w-full max-w-[32rem] mx-auto lg:mx-0 lg:justify-self-center">
             <div className="flow-step done">
               <div className="flow-num">1</div>
               <div className="flow-text">
@@ -126,7 +125,7 @@ export default async function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="ticket" style={{ transform: "rotate(-2deg)", margin: "0 auto" }}>
+          <div className="ticket justify-self-center self-center" style={{ transform: "rotate(-2deg)" }}>
             <div className="ticket-top">
               <div>
                 <div className="ticket-label">Match ticket</div>
@@ -151,8 +150,8 @@ export default async function LandingPage() {
           <h2>The city&apos;s biggest hearts.</h2>
         </div>
 
-        <div className="public-leaderboard bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 max-w-[800px] mx-auto shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
-          <div className="lb-header hidden sm:grid grid-cols-[minmax(3.5rem,0.45fr)_minmax(0,1fr)_minmax(7.5rem,0.65fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
+        <div className="public-leaderboard w-full max-w-[960px] mx-auto bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
+          <div className="lb-header hidden sm:grid grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)_minmax(8rem,0.65fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
             <div>Rank</div>
             <div>Donor</div>
             <div style={{ textAlign: "right" }}>Lifetime Given</div>
@@ -164,7 +163,7 @@ export default async function LandingPage() {
             </p>
           ) : (
             leaderboard.map((entry) => (
-              <div key={entry.rank} className={`lb-row grid grid-cols-[2.75rem_minmax(0,1fr)_auto] sm:grid-cols-[minmax(3.5rem,0.45fr)_minmax(0,1fr)_minmax(7.5rem,0.65fr)] gap-x-3 sm:gap-x-4 lg:gap-x-6 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
+              <div key={entry.rank} className={`lb-row grid grid-cols-[2.75rem_minmax(0,1fr)_auto] sm:grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)_minmax(8rem,0.65fr)] gap-x-3 sm:gap-x-4 lg:gap-x-6 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
                 <div className="rank-num justify-self-center text-xl sm:text-2xl font-black text-[var(--ink-soft)]">{entry.rank}</div>
                 <div className="min-w-0 text-center">
                   <div className="name font-semibold text-sm sm:text-base">{entry.name}</div>
