@@ -38,6 +38,7 @@ export interface HelpRequest {
   id: string
   requestor: string
   need: string
+  type: DonationType
   priority: Priority
   barangay: string
   neighborhood: string
@@ -159,6 +160,7 @@ function mapRequest(row: DbHelpRequest, requestorName?: string | null): HelpRequ
     id: row.id,
     requestor: requestorName || 'Unknown household',
     need: isCash ? 'Cash Assistance' : foodNeed,
+    type: row.type,
     priority: row.priority_tier,
     barangay: row.address,
     neighborhood: row.address,
