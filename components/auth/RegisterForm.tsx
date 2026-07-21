@@ -10,6 +10,12 @@ import Image from 'next/image'
 
 const initialState = {
   error: '',
+  success: '',
+}
+
+type RegistrationState = {
+  error?: string
+  success?: string
 }
 
 type Role = 'donor' | 'recipient' | 'admin'
@@ -30,7 +36,7 @@ export function RegisterForm() {
 
   const passwordsMismatch = confirmTouched && confirmPassword.length > 0 && password !== confirmPassword
 
-  const [state, formAction] = useActionState(async (prevState: { error: string }, formData: FormData) => {
+  const [state, formAction] = useActionState(async (prevState: RegistrationState, formData: FormData) => {
     if (password !== confirmPassword) {
       return { error: 'Passwords do not match' }
     }
@@ -39,7 +45,7 @@ export function RegisterForm() {
     if (res?.error) {
       return { error: res.error }
     }
-    return prevState
+    return res ?? prevState
   }, initialState)
 
   const handleGoogleSignIn = async () => {
@@ -111,6 +117,7 @@ export function RegisterForm() {
           <p className="sub">Start giving or receiving food assistance in Cebu City.</p>
 
           {state?.error && <div className="auth-error">{state.error}</div>}
+          {state?.success && <div className="auth-success" role="status">{state.success}</div>}
 
           <form action={formAction} noValidate>
             <div className="auth-field">

@@ -1,23 +1,22 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getSupabasePublicConfig } from '@/lib/supabase/config'
 
 /**
  * Handles Supabase auth session token synchronization and cookie refreshing inside Edge proxy.
  */
 export async function updateSupabaseSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request,
-  })
+  let response = NextResponse.next({ request })
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.warn('⚠️ Proxy: Supabase environment variables are missing.')
+  let config: ReturnType<typeof getSupabasePublicConfig>
+  try {
+    config = getSupabasePublicConfig()
+  } catch (error) {
+    console.error('Proxy: Supabase public configuration is missing.', error)
     return { response, user: null, error: null }
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+  const supabase = createServerClient(config.url, config.publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll()
@@ -28,9 +27,7 @@ export async function updateSupabaseSession(request: NextRequest) {
             request.cookies.set(name, value)
           })
 
-          response = NextResponse.next({
-            request,
-          })
+          response = NextResponse.next({ request })
 
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set({
