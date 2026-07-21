@@ -89,18 +89,28 @@ export async function registerAction(formData: FormData): Promise<RegistrationSt
         full_name: fullName,
         role: role,
       },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
     },
   })
 
   if (error) {
-    console.error('Supabase sign-up failed:', error)
-    return { error: registrationErrorMessage(error) }
+    console.error('Signup error:', error)
+    
+    let errorMessage = 'An unexpected error occurred during sign up.'
+    if (error.message && error.message !== '{}') {
+      errorMessage = error.message
+    } else if (error.status === 500) {
+      errorMessage = 'Server configuration error: Unable to send confirmation email. Please check SMTP settings.'
+    }
+    
+    return { error: errorMessage }
   }
 
+  // Usually users need to confirm their email depending on Supabase settings.
+  // For this example, we'll redirect them to dashboard (if auto-confirm is enabled)
+  // or they'll be asked to check their email.
   revalidatePath('/', 'layout')
-  return {
-    success: 'Account created. Check your inbox and verify your email before signing in.',
-  }
+  redirect('/dashboard')
 }
 
 export async function logoutAction() {

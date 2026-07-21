@@ -59,6 +59,15 @@ export async function GET(request: NextRequest) {
       }
     } else {
       console.error('OAuth Callback Error:', error.message)
+      
+      // FIX: Email clients often pre-fetch links which burns the one-time PKCE code.
+      // If exchangeCodeForSession fails, check if the user's cookie was already successfully set during the pre-fetch!
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        console.log('User is already logged in (likely via prefetch). Redirecting to destination.')
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
     }
   }

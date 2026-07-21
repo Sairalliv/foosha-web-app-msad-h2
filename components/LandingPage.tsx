@@ -151,10 +151,9 @@ export default async function LandingPage() {
         </div>
 
         <div className="public-leaderboard w-full bg-[var(--paper)] text-[var(--ink)] rounded-xl p-5 sm:p-6 lg:p-10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(0,0,0,0.04)]">
-          <div className="lb-header hidden sm:grid grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)_minmax(8rem,0.65fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
+          <div className="lb-header hidden sm:grid grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)] gap-x-4 lg:gap-x-6 text-center text-[11px] tracking-widest uppercase text-[var(--ink-soft)] border-b-2 border-dashed border-[rgba(28,42,34,0.15)] pb-4 mb-3">
             <div>Rank</div>
             <div>Donor</div>
-            <div style={{ textAlign: "right" }}>Lifetime Given</div>
           </div>
 
           {leaderboard.length === 0 ? (
@@ -163,7 +162,7 @@ export default async function LandingPage() {
             </p>
           ) : (
             leaderboard.map((entry) => (
-              <div key={entry.rank} className={`lb-row grid grid-cols-[2.75rem_minmax(0,1fr)_auto] sm:grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)_minmax(8rem,0.65fr)] gap-x-3 sm:gap-x-4 lg:gap-x-6 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
+              <div key={entry.rank} className={`lb-row grid grid-cols-[2.75rem_minmax(0,1fr)] sm:grid-cols-[minmax(4rem,0.45fr)_minmax(0,1fr)] gap-x-3 sm:gap-x-4 lg:gap-x-6 items-center py-4 border-b border-[rgba(28,42,34,0.1)] ${entry.rank === 1 ? "top-rank" : ""}`}>
                 <div className="rank-num justify-self-center text-xl sm:text-2xl font-black text-[var(--ink-soft)]">{entry.rank}</div>
                 <div className="min-w-0 text-center">
                   <div className="name font-semibold text-sm sm:text-base">{entry.name}</div>
@@ -177,7 +176,6 @@ export default async function LandingPage() {
                     </div>
                   )}
                 </div>
-                <div className="amount justify-self-end whitespace-nowrap font-mono text-xs sm:text-[15px] font-semibold text-right text-[var(--bg-deep)]">{entry.amount}</div>
               </div>
             ))
           )}

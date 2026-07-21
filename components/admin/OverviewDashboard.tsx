@@ -6,10 +6,8 @@ import {
   Package,
   Banknote,
   Clock,
-  ChevronRight,
-  ShieldAlert
+  ChevronRight
 } from 'lucide-react'
-import { getSupabaseService } from '@/lib/supabaseService.client'
 import { NearbyMapPanel } from '@/components/dashboard/NearbyMapPanel'
 import type { MatchingQueueItem, VerificationItem, LeaderboardEntry, OverviewStats } from '@/lib/supabaseService'
 
@@ -46,29 +44,7 @@ function BadgeIcons({ badges }: { badges: string[] }) {
   )
 }
 
-export function OverviewDashboard({ initialMatchingQueue, initialVerificationFeed, initialLeaderboard, stats }: Props) {
-  const [verificationFeed, setVerificationFeed] = useState(initialVerificationFeed)
-  const [otpCodes, setOtpCodes] = useState<Record<string, string>>({})
-  const [verifyingId, setVerifyingId] = useState<string | null>(null)
-  const [verifyError, setVerifyError] = useState<string | null>(null)
-
-  const handleVerify = async (id: string) => {
-    const code = otpCodes[id]
-    if (!code) return
-    setVerifyingId(id)
-    setVerifyError(null)
-    try {
-      const supabaseService = getSupabaseService()
-      await supabaseService.confirmMatchPickup(id, code)
-      setVerificationFeed((prev) => prev.filter((item) => item.id !== id))
-      setOtpCodes((prev) => ({ ...prev, [id]: '' }))
-    } catch (e) {
-      console.error(e)
-      setVerifyError('That code is invalid or already used. Double-check and try again.')
-    } finally {
-      setVerifyingId(null)
-    }
-  }
+export function OverviewDashboard({ initialMatchingQueue, initialLeaderboard, stats }: Props) {
 
   const todayLabel = new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
 
@@ -264,72 +240,6 @@ export function OverviewDashboard({ initialMatchingQueue, initialVerificationFee
             </div>
           </div>
 
-          {/* OTP Security Verification Panel */}
-          <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldAlert size={18} color="var(--jeepney)" />
-                <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: 'var(--paper)' }}>OTP Security Verification</h3>
-              </div>
-              <Link href="/admin/verification" style={{ fontSize: '13px', color: 'var(--kalamansi)', textDecoration: 'none', fontWeight: 500 }}>
-                Verification Center
-              </Link>
-            </div>
-            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {verificationFeed.length === 0 && (
-                <div style={{ color: 'var(--paper-dim)', fontSize: '13px', textAlign: 'center', padding: '12px 0' }}>
-                  No pending pickups awaiting verification.
-                </div>
-              )}
-              {verifyError && (
-                <div style={{ color: '#fbbf24', fontSize: '12px' }}>{verifyError}</div>
-              )}
-              {verificationFeed.slice(0, 3).map((item) => (
-                <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.1)', padding: '12px 16px', borderRadius: '8px' }}>
-                  <div>
-                    <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--paper)', marginBottom: '4px' }}>{item.recipient}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--paper-dim)' }}>Ticket {item.id} • {item.donor}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input 
-                      type="text" 
-                      placeholder="Enter OTP"
-                      maxLength={6}
-                      value={otpCodes[item.id] || ''}
-                      onChange={(e) => setOtpCodes(prev => ({ ...prev, [item.id]: e.target.value.toUpperCase() }))}
-                      style={{ 
-                        width: '100px', 
-                        padding: '8px', 
-                        background: 'rgba(255,255,255,0.05)', 
-                        border: '1px solid var(--line)', 
-                        borderRadius: '4px', 
-                        color: 'var(--paper)', 
-                        fontFamily: 'var(--font-mono)', 
-                        textAlign: 'center',
-                        letterSpacing: '2px'
-                      }}
-                    />
-                    <button 
-                      onClick={() => handleVerify(item.id)}
-                      disabled={!otpCodes[item.id] || verifyingId === item.id}
-                      style={{ 
-                        background: 'var(--jeepney)', 
-                        color: 'white', 
-                        border: 'none', 
-                        padding: '8px 16px', 
-                        borderRadius: '4px', 
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        opacity: (!otpCodes[item.id] || verifyingId === item.id) ? 0.5 : 1
-                      }}
-                    >
-                      {verifyingId === item.id ? 'Verifying…' : 'Verify'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Top Donors Leaderboard Widget */}

@@ -2,6 +2,7 @@ import { requireUserProfile } from '@/lib/auth/guards'
 import { DonorDashboard } from '@/components/dashboard/DonorDashboard'
 import { RecipientDashboard } from '@/components/dashboard/RecipientDashboard'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import { getDisplayName } from '@/lib/utils/name'
 import Link from 'next/link'
 
 export const metadata = {
@@ -18,7 +19,7 @@ export default async function DashboardPage({
 
   const effectiveRole = resolvedParams?.demo_role || profile?.role || 'donor'
 
-  const displayName = profile?.full_name || user.email || 'there'
+  const displayName = getDisplayName(profile?.full_name, user.email, 'there')
   const initials = displayName
     .split(' ')
     .map((part: string) => part[0])
